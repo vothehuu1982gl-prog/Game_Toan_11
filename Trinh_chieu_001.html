@@ -1,0 +1,801 @@
+<!DOCTYPE html><html lang="vi"><head><meta charset='UTF-8'>
+        <meta http-equiv="Content-Security-Policy" content="default-src * data: blob: 'unsafe-inline' 'unsafe-eval'; script-src * 'unsafe-inline' 'unsafe-eval'; connect-src * 'unsafe-inline'; img-src * data: blob: 'unsafe-inline'; frame-src *; style-src * 'unsafe-inline'; font-src * data: blob: 'unsafe-inline';">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+        <meta name="apple-mobile-web-app-capable" content="yes">
+        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+        <meta name="format-detection" content="telephone=no">
+        <meta name="mobile-web-app-capable" content="yes">
+        <meta name="theme-color" content="#2563eb">
+        
+            <style>
+:root{
+  --bg-1:#f8fbff;
+  --bg-2:#eef7ff;
+  --surface:#ffffff;
+  --surface-2:#f8fbff;
+  --text-1:#16324f;
+  --text-2:#49627d;
+  --line:#dbe7f3;
+  --line-strong:#bfd4e7;
+  --shadow:0 18px 50px rgba(38,70,108,.12);
+  --shadow-soft:0 8px 24px rgba(38,70,108,.08);
+  --primary:#2563eb;
+  --primary-2:#1d4ed8;
+  --accent:#0ea5e9;
+  --success:#16a34a;
+  --warning:#f59e0b;
+  --danger:#ef4444;
+  --base-size:32px;
+  --opt-size:28px;
+  --badge-size:50px;
+  --math-scale:112%;
+  --radius-xl:24px;
+  --radius-lg:18px;
+  --radius-md:14px;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{
+  font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background:
+    radial-gradient(circle at top left, #ffffff 0%, #f6fbff 32%, transparent 55%),
+    linear-gradient(180deg, var(--bg-1) 0%, var(--bg-2) 100%);
+  color:var(--text-1);
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  min-height:100dvh;
+  overflow-x:hidden;
+  overflow-y:auto;
+  user-select:none;
+  -webkit-tap-highlight-color:transparent;
+}
+.slide-container{
+  width:min(95%, 1480px);
+  height:calc(100dvh - 18px);
+  margin:9px auto;
+  background:linear-gradient(180deg,#ffffff 0%, #fbfdff 100%);
+  border:1px solid rgba(191,212,231,.85);
+  border-radius:var(--radius-xl);
+  box-shadow:var(--shadow);
+  padding:22px 28px 20px;
+  display:none;
+  flex-direction:column;
+  position:relative;
+  overflow:hidden;
+}
+.slide-container::before{
+  content:"";
+  position:absolute;
+  inset:0 0 auto 0;
+  height:6px;
+  background:linear-gradient(90deg,var(--primary),var(--accent),#22c55e);
+}
+.slide-container.active{display:flex;animation:slideIn .28s ease-out}
+.q-header{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:16px;
+  padding-bottom:14px;
+  margin-bottom:14px;
+  border-bottom:1px solid var(--line);
+}
+.header-left,.header-right{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.part-badge{
+  background:linear-gradient(135deg,var(--primary) 0%, var(--accent) 100%);
+  color:#fff;
+  padding:11px 22px;
+  border-radius:999px;
+  font-size:19px;
+  font-weight:800;
+  text-transform:uppercase;
+  letter-spacing:.4px;
+  box-shadow:0 10px 20px rgba(37,99,235,.24);
+}
+.zoom-btn,.timer,.btn-exit-html,.slide-counter,.btn-action,.btn-option,.btn-tf,input.answer-input{transition:all .2s ease}
+.zoom-btn{
+  width:44px;height:44px;border-radius:50%;
+  border:1px solid var(--line-strong);
+  background:#fff;color:var(--text-1);
+  font-size:22px;font-weight:800;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  box-shadow:var(--shadow-soft);
+}
+.zoom-btn:hover{transform:translateY(-1px);background:#f6fbff;border-color:#9fc1df}
+.zoom-btn:active{transform:translateY(1px) scale(.98)}
+.timer{
+  font-size:22px;color:var(--text-1);font-weight:800;
+  background:linear-gradient(180deg,#ffffff 0%, #f4f9ff 100%);
+  padding:10px 22px;border-radius:999px;cursor:pointer;
+  border:1px solid var(--line-strong);box-shadow:var(--shadow-soft);
+  display:flex;align-items:center;gap:8px;min-width:190px;justify-content:center;
+}
+.timer:hover{background:#edf6ff}
+.timer.running{
+  color:#b91c1c;
+  background:linear-gradient(180deg,#fff4f4 0%, #fee2e2 100%);
+  border-color:#fca5a5;
+  animation:pulse 1s infinite;
+}
+.btn-exit-html{
+  background:linear-gradient(135deg,#fb7185 0%, var(--danger) 100%);
+  color:#fff;border:none;padding:10px 22px;border-radius:999px;
+  font-size:18px;font-weight:800;cursor:pointer;
+  box-shadow:0 12px 24px rgba(239,68,68,.22);
+}
+.btn-exit-html:hover{transform:translateY(-1px);filter:saturate(1.05)}
+.content-wrapper{
+  flex-grow:1;overflow-y:auto;padding-right:10px;padding-bottom:20px;
+  display:flex;flex-direction:column;
+}
+.content-wrapper::-webkit-scrollbar{width:10px}
+.content-wrapper::-webkit-scrollbar-thumb{background:#cfe0ef;border-radius:999px;border:2px solid #f6fbff}
+.content-wrapper::-webkit-scrollbar-track{background:transparent}
+.question-content{
+  font-size:var(--base-size);font-weight:600;color:var(--text-1);
+  margin-bottom:12px;line-height:1.55;text-align:justify;
+}
+.q-label{
+  display:inline-flex;align-items:center;justify-content:center;
+  min-width:86px;padding:6px 14px;margin-right:10px;border-radius:999px;
+  color:#fff;background:linear-gradient(135deg,#f59e0b 0%, #f97316 100%);
+  font-weight:900;box-shadow:0 8px 18px rgba(249,115,22,.24);
+}
+mjx-container{font-size:var(--math-scale)!important;margin:0 3px!important}
+.img-container{text-align:center;margin:8px 0 14px;width:100%;padding:10px 0}
+.real-image{
+  display:inline-block;max-width:92%;height:auto;max-height:410px;
+  border-radius:18px;border:1px solid #cfe0ef;background:#fff;
+  box-shadow:var(--shadow-soft);padding:6px;cursor:zoom-in;
+}
+.img-hint{font-size:13px;color:var(--text-2);font-style:italic;margin-top:6px}
+.table-container{
+  width:100%;overflow-x:auto;margin:18px 0;display:flex;justify-content:center;
+}
+.styled-table{
+  border-collapse:collapse;background:#fff;border:1px solid #cdddeb;min-width:60%;
+  text-align:center;box-shadow:var(--shadow-soft);border-radius:16px;overflow:hidden;
+}
+.styled-table th,.styled-table td{
+  border:1px solid #e2edf6;padding:12px 18px;font-size:var(--base-size);color:var(--text-1);
+}
+.styled-table th{background:linear-gradient(180deg,#f5faff 0%, #edf6ff 100%);font-weight:800}
+.options-grid-4,.options-grid-2,.options-grid-1{gap:16px;margin:10px 0 20px}
+.options-grid-4{display:grid;grid-template-columns:repeat(4,1fr)}
+.options-grid-2{display:grid;grid-template-columns:repeat(2,1fr)}
+.options-grid-1{display:grid;grid-template-columns:1fr}
+.btn-option{
+  background:linear-gradient(180deg,#ffffff 0%, #f9fcff 100%);
+  border:1px solid var(--line-strong);padding:16px 16px;font-size:var(--opt-size);
+  border-radius:18px;cursor:pointer;text-align:left;font-weight:600;color:var(--text-1);
+  display:flex;align-items:center;gap:14px;box-shadow:var(--shadow-soft);
+}
+.btn-option:hover{transform:translateY(-2px);border-color:#9fc1df;background:#ffffff}
+.btn-option:active{transform:translateY(0)}
+.opt-badge{
+  width:var(--badge-size);height:var(--badge-size);
+  background:linear-gradient(135deg,var(--success) 0%, #22c55e 100%);
+  color:#fff;border-radius:14px;display:flex;justify-content:center;align-items:center;
+  font-weight:900;flex-shrink:0;box-shadow:0 10px 18px rgba(34,197,94,.18);
+}
+.btn-option.correct{
+  background:linear-gradient(180deg,#f0fdf4 0%, #dcfce7 100%)!important;
+  border-color:#86efac!important;color:#14532d!important;
+}
+.btn-option.correct .opt-badge{background:linear-gradient(135deg,#15803d 0%, #16a34a 100%)}
+.btn-option.wrong{
+  opacity:.72;background:linear-gradient(180deg,#fff5f5 0%, #fee2e2 100%)!important;
+  border-color:#fca5a5!important;
+}
+.btn-option.wrong .opt-badge{background:linear-gradient(135deg,#b91c1c 0%, #ef4444 100%)}
+.btn-option.disabled{pointer-events:none}
+.tf-container{display:flex;flex-direction:column;gap:14px;margin:8px 0 22px}
+.tf-row{
+  display:flex;align-items:center;justify-content:space-between;gap:18px;
+  background:linear-gradient(180deg,#ffffff 0%, #f9fcff 100%);
+  padding:16px 18px;border-radius:18px;border:1px solid #dbe7f3;box-shadow:var(--shadow-soft);
+}
+.tf-content{font-size:var(--opt-size);font-weight:600;color:var(--text-1);flex-grow:1}
+.tf-buttons{display:flex;gap:12px;min-width:180px}
+.btn-tf{
+  border:1px solid var(--line-strong);background:linear-gradient(180deg,#ffffff 0%, #f4f9ff 100%);
+  padding:11px 0;border-radius:12px;font-weight:900;cursor:pointer;flex:1;color:var(--text-2);
+  text-align:center;font-size:22px;box-shadow:var(--shadow-soft);
+}
+.btn-tf:hover{transform:translateY(-1px);border-color:#9fc1df}
+.btn-tf.user-correct{background:linear-gradient(135deg,#22c55e 0%, #16a34a 100%)!important;color:#fff!important;border-color:#16a34a!important}
+.btn-tf.user-wrong{background:linear-gradient(135deg,#f87171 0%, #ef4444 100%)!important;color:#fff!important;border-color:#dc2626!important}
+.btn-tf.reveal-true{border:2px solid #22c55e!important;color:#166534!important;background:#ecfdf5!important}
+.btn-tf.reveal-false{border:2px solid #ef4444!important;color:#b91c1c!important;background:#fef2f2!important}
+.short-answer-area{
+  display:flex;flex-direction:column;align-items:center;margin:6px 0 28px;width:100%;
+}
+.input-group{position:relative;width:min(74%, 820px)}
+input.answer-input{
+  width:100%;padding:18px 24px;font-size:30px;border:2px solid #cdddeb;border-radius:18px;
+  outline:none;text-align:center;font-weight:800;color:var(--text-1);
+  background:linear-gradient(180deg,#ffffff 0%, #f8fbff 100%);box-shadow:var(--shadow-soft);
+}
+input.answer-input:focus{
+  border-color:#93c5fd;background:#fff;box-shadow:0 0 0 5px rgba(59,130,246,.12);
+}
+.explanation-box{
+  display:none;margin-top:18px;padding:22px 24px;
+  background:linear-gradient(180deg,#f4fbff 0%, #e9f7ff 100%);
+  border:1px solid #bae6fd;border-left:8px solid var(--accent);
+  border-radius:18px;animation:fadeIn .35s;box-shadow:var(--shadow-soft);
+}
+.explanation-title{
+  font-weight:900;color:#0369a1;margin-bottom:10px;font-size:26px;
+  display:flex;align-items:center;gap:10px;
+}
+.explanation-content{font-size:var(--opt-size);color:var(--text-1);line-height:1.65}
+.actions-area{
+  display:flex;justify-content:center;align-items:center;gap:14px;flex-wrap:wrap;
+  margin-top:auto;padding-top:16px;border-top:1px solid var(--line);
+}
+.btn-action{
+  color:#fff;border:none;padding:12px 22px;font-size:18px;font-weight:800;border-radius:14px;
+  cursor:pointer;min-width:170px;display:flex;align-items:center;justify-content:center;gap:10px;
+  box-shadow:0 12px 22px rgba(15,23,42,.12);
+}
+.btn-action:hover{transform:translateY(-2px)}
+.btn-action:active{transform:translateY(0)}
+.btn-reveal{background:linear-gradient(135deg,#f59e0b 0%, #f97316 100%)}
+.btn-check{background:linear-gradient(135deg,#3b82f6 0%, var(--primary-2) 100%)}
+.btn-explain{background:linear-gradient(135deg,#10b981 0%, #059669 100%)}
+.slide-counter{
+  font-size:18px;font-weight:900;color:var(--text-1);
+  background:linear-gradient(180deg,#ffffff 0%, #edf6ff 100%);
+  padding:10px 22px;border-radius:999px;border:1px solid #d7e6f3;box-shadow:var(--shadow-soft);
+}
+.nav-arrow{
+  position:fixed;top:50%;transform:translateY(-50%);
+  width:58px;height:74px;background:rgba(37,99,235,.16);color:#fff;font-size:34px;border:none;
+  border-radius:18px;cursor:pointer;transition:.25s;z-index:100;display:flex;justify-content:center;
+  align-items:center;backdrop-filter:blur(10px);box-shadow:0 12px 28px rgba(37,99,235,.18);
+}
+.nav-arrow:hover{background:rgba(37,99,235,.9);transform:translateY(-50%) scale(1.04)}
+.nav-prev{left:10px}
+.nav-next{right:10px}
+.feedback-popup{
+  position:absolute;top:45%;left:50%;transform:translate(-50%,-50%) scale(.75);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;opacity:0;z-index:9999;
+  pointer-events:none;transition:all .35s cubic-bezier(.175,.885,.32,1.275);
+  filter:drop-shadow(0 18px 30px rgba(15,23,42,.2));background:rgba(255,255,255,.96);
+  padding:20px 44px;border-radius:28px;text-align:center;border:4px solid transparent;backdrop-filter:blur(8px);
+}
+.feedback-popup.correct{border-color:#4ade80;color:#15803d}
+.feedback-popup.wrong{border-color:#f87171;color:#b91c1c}
+.feedback-popup .emoji{font-size:92px;line-height:1;margin-bottom:10px}
+.feedback-popup .message{font-size:36px;font-weight:900;white-space:nowrap}
+.feedback-popup.pop{transform:translate(-50%,-50%) scale(1);opacity:1}
+@keyframes slideIn{from{opacity:0;transform:translateY(18px) scale(.995)}to{opacity:1;transform:translateY(0) scale(1)}}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(248,113,113,.35)}70%{box-shadow:0 0 0 14px rgba(248,113,113,0)}100%{box-shadow:0 0 0 0 rgba(248,113,113,0)}}
+@media (max-width:1024px){
+  :root{--base-size:26px;--opt-size:23px;--badge-size:44px;--math-scale:106%}
+  .options-grid-4{grid-template-columns:repeat(2,1fr)}
+}
+@media (max-width:768px){
+  :root{--base-size:20px;--opt-size:18px;--badge-size:36px;--math-scale:100%}
+  .slide-container{width:100%;height:100dvh;padding:14px;border-radius:0;margin:0;border:none}
+  .q-header{flex-direction:column;align-items:stretch}
+  .header-left,.header-right{justify-content:space-between;width:100%}
+  .part-badge{font-size:15px;padding:8px 14px}
+  .btn-exit-html,.timer{font-size:15px;padding:8px 14px;min-width:118px}
+  .zoom-btn{width:36px;height:36px;font-size:18px}
+  .table-container{justify-content:flex-start}
+  .styled-table{min-width:100%}
+  .styled-table th,.styled-table td{padding:8px 10px}
+  .options-grid-4,.options-grid-2{grid-template-columns:1fr;gap:10px;margin-bottom:12px}
+  .btn-option{padding:12px}
+  .tf-row{flex-direction:column;align-items:stretch}
+  .tf-content{margin-bottom:8px}
+  .tf-buttons{min-width:100%}
+  .input-group{width:100%}
+  input.answer-input{font-size:24px;padding:15px}
+  .nav-arrow{display:none}
+  .actions-area{gap:10px}
+  .btn-action{flex:1;min-width:130px;font-size:15px;padding:10px}
+  .slide-counter{font-size:15px;width:100%;text-align:center;order:3;margin-top:4px}
+  .slide-counter::after{
+    content:"👈 Vuốt ngang để chuyển câu 👉";
+    display:block;font-size:13px;font-weight:700;color:#0f766e;margin-top:5px;
+  }
+}
+
+.draw-toolbar{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.draw-sep{width:1px;height:34px;background:#d6e3f0;margin:0 2px}
+.draw-btn,.color-btn{
+  width:44px;height:44px;border-radius:50%;
+  border:1px solid var(--line-strong);background:#fff;color:var(--text-1);
+  display:flex;align-items:center;justify-content:center;cursor:pointer;
+  box-shadow:var(--shadow-soft);font-size:22px;font-weight:800;transition:all .2s ease;
+}
+.draw-btn:hover,.color-btn:hover{transform:translateY(-1px);background:#f6fbff;border-color:#9fc1df}
+.draw-btn.active{background:linear-gradient(135deg,var(--primary) 0%, var(--accent) 100%);color:#fff;border-color:transparent}
+.color-btn{position:relative;font-size:0}
+.color-btn::after{content:"";width:28px;height:28px;border-radius:50%;display:block;box-shadow:inset 0 0 0 1px rgba(255,255,255,.35)}
+.color-btn.active{border:2px solid #111827;transform:translateY(-1px) scale(1.04)}
+.color-btn[data-color="red"]::after{background:#ff5a47}
+.color-btn[data-color="blue"]::after{background:#3b82f6}
+.color-btn[data-color="green"]::after{background:#16a34a}
+.slide-draw-canvas{
+  position:absolute;left:0;right:0;top:72px;bottom:0;width:100%;height:calc(100% - 72px);
+  z-index:12;background:transparent;display:block;pointer-events:none;touch-action:none;
+}
+.slide-container.draw-mode-pen .slide-draw-canvas,
+.slide-container.draw-mode-eraser .slide-draw-canvas{pointer-events:auto}
+.slide-container.draw-mode-pen .slide-draw-canvas{cursor:crosshair}
+.slide-container.draw-mode-eraser .slide-draw-canvas{cursor:cell}
+.q-header,.actions-area{position:relative;z-index:20}
+.content-wrapper{position:relative;z-index:5}
+@media (max-width:768px){
+  .draw-toolbar{gap:8px}
+  .draw-btn,.color-btn{width:36px;height:36px;font-size:18px}
+  .color-btn::after{width:22px;height:22px}
+  .slide-draw-canvas{top:112px;height:calc(100% - 112px)}
+}
+
+</style>
+        
+        <script>
+        MathJax = { tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$']], processEscapes: true }, chtml: { scale: 1, matchFontHeight: false } };
+        </script>
+        <script defer src='https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js'></script>
+        <style id="imath-options-stack-style">.options-stack{display:flex;flex-direction:column;gap:12px;width:100%;}.options-stack .btn-option{width:100%;display:flex;align-items:flex-start;}.options-stack .opt-text{flex:1;}</style></head><body>
+        
+            <button class="nav-arrow nav-prev" onclick="prevSlide()" title="Câu trước (Mũi tên trái)">❮</button>
+            <button class="nav-arrow nav-next" onclick="nextSlide()" title="Câu sau (Mũi tên phải hoặc Enter)">❯</button>
+        
+        <div class="slide-container" id="slide-0"><div class="q-header"><div class="header-left"><div class="part-badge">PHẦN I (Trắc nghiệm)</div></div><div class="header-right"><button class="zoom-btn" onclick="changeFontSize(-2)" title="Giảm cỡ chữ">A-</button><button class="zoom-btn" onclick="changeFontSize(2)" title="Tăng cỡ chữ">A+</button><div class="timer" onclick="startTimer(this)" ondblclick="editTimer(this)" data-time="60" title="Click: Chạy/Dừng. Click đúp: Sửa thời gian.">⏳ Bắt đầu (01:00)</div><button class="btn-exit-html" onclick="document.title='EXIT_FULL_SCREEN'" title="Thoát chế độ trình chiếu (Phím Esc)">❌ Thoát</button></div></div><div class="content-wrapper"><div class="question-content"><span class="q-label">Câu 1:</span> Cho hai biến cố ${A}$ và ${D}$ có $P(A)=0,46$ và $P(AD)= 0,22$. Tính xác suất $P(D|A)$ (kết quả làm tròn đến hàng phần trăm).</div><div class="options-stack"><div class="btn-option" data-correct="false" onclick="checkChoice(this, false)"><div class="opt-badge">A</div> <div class="opt-text">${0,75}$.</div></div><div class="btn-option" data-correct="false" onclick="checkChoice(this, false)"><div class="opt-badge">B</div> <div class="opt-text">${0,08}$.</div></div><div class="btn-option" data-correct="false" onclick="checkChoice(this, false)"><div class="opt-badge">C</div> <div class="opt-text">${0,95}$.</div></div><div class="btn-option" data-correct="true" onclick="checkChoice(this, true)"><div class="opt-badge">D</div> <div class="opt-text">${0,48}$.</div></div></div><div class="actions-area"><button class="btn-action btn-reveal" onclick="revealAnswerMC(this)">👁 HIỆN ĐÁP ÁN</button><div class="slide-counter" id="counter-0">Câu ? / ?</div><button class="btn-action btn-explain" onclick="toggleExpl(this)">💡 XEM LỜI GIẢI</button></div><div class="explanation-box"><div class="explanation-title">📝 LỜI GIẢI CHI TIẾT:</div><div class="explanation-content">Cho hai biến cố ${A}$ và ${D}$ có $P(A)=0,46$ và $P(AD)= 0,22$. Tính xác suất $P(D|A)$ (kết quả làm tròn đến hàng phần trăm).<br><br>A. ${0,75}$.	   B. ${0,08}$.	    C. ${0,95}$.	     D. ${0,48}$.<br><br>Lời giải:<br> Chọn D <br> $P(D|A)=\dfrac{P(DA)}{P(A)}=\dfrac{0,22}{0,46}=0,48$.</div></div></div></div><div class="slide-container" id="slide-1"><div class="q-header"><div class="header-left"><div class="part-badge">PHẦN I (Trắc nghiệm)</div></div><div class="header-right"><button class="zoom-btn" onclick="changeFontSize(-2)" title="Giảm cỡ chữ">A-</button><button class="zoom-btn" onclick="changeFontSize(2)" title="Tăng cỡ chữ">A+</button><div class="timer" onclick="startTimer(this)" ondblclick="editTimer(this)" data-time="60" title="Click: Chạy/Dừng. Click đúp: Sửa thời gian.">⏳ Bắt đầu (01:00)</div><button class="btn-exit-html" onclick="document.title='EXIT_FULL_SCREEN'" title="Thoát chế độ trình chiếu (Phím Esc)">❌ Thoát</button></div></div><div class="content-wrapper"><div class="question-content"><span class="q-label">Câu 2:</span> Cho hai biến cố ${B}$ và ${C}$ có $P(B)=0,69$ và $P(C|B)=0,19$. Tính xác suất $P(BC)$ (kết quả làm tròn đến hàng phần trăm).</div><div class="options-stack"><div class="btn-option" data-correct="false" onclick="checkChoice(this, false)"><div class="opt-badge">A</div> <div class="opt-text">${0,79}$.</div></div><div class="btn-option" data-correct="true" onclick="checkChoice(this, true)"><div class="opt-badge">B</div> <div class="opt-text">${0,13}$.</div></div><div class="btn-option" data-correct="false" onclick="checkChoice(this, false)"><div class="opt-badge">C</div> <div class="opt-text">${0,60}$.</div></div><div class="btn-option" data-correct="false" onclick="checkChoice(this, false)"><div class="opt-badge">D</div> <div class="opt-text">${0,54}$.</div></div></div><div class="actions-area"><button class="btn-action btn-reveal" onclick="revealAnswerMC(this)">👁 HIỆN ĐÁP ÁN</button><div class="slide-counter" id="counter-1">Câu ? / ?</div><button class="btn-action btn-explain" onclick="toggleExpl(this)">💡 XEM LỜI GIẢI</button></div><div class="explanation-box"><div class="explanation-title">📝 LỜI GIẢI CHI TIẾT:</div><div class="explanation-content">Cho hai biến cố ${B}$ và ${C}$ có $P(B)=0,69$ và $P(C|B)=0,19$. Tính xác suất $P(BC)$ (kết quả làm tròn đến hàng phần trăm).<br><br>A. ${0,79}$.	   B. ${0,13}$.	    C. ${0,60}$.	     D. ${0,54}$.<br><br>Lời giải:<br> Chọn B <br> $P(C|B)=\dfrac{P(CB)}{P(B)}\Rightarrow P(BC)=P(B).P(C|B)=0,69.0,19=0,13$.</div></div></div></div><div class="slide-container" id="slide-2"><div class="q-header"><div class="header-left"><div class="part-badge">PHẦN I (Trắc nghiệm)</div></div><div class="header-right"><button class="zoom-btn" onclick="changeFontSize(-2)" title="Giảm cỡ chữ">A-</button><button class="zoom-btn" onclick="changeFontSize(2)" title="Tăng cỡ chữ">A+</button><div class="timer" onclick="startTimer(this)" ondblclick="editTimer(this)" data-time="60" title="Click: Chạy/Dừng. Click đúp: Sửa thời gian.">⏳ Bắt đầu (01:00)</div><button class="btn-exit-html" onclick="document.title='EXIT_FULL_SCREEN'" title="Thoát chế độ trình chiếu (Phím Esc)">❌ Thoát</button></div></div><div class="content-wrapper"><div class="question-content"><span class="q-label">Câu 3:</span> Cho hai biến cố ${A}$ và ${B}$ có $P(B)=0,27, P(A|B)= 0,53$. Tính xác suất $P(\overline{A}B)$ (kết quả làm tròn đến hàng phần trăm).</div><div class="options-stack"><div class="btn-option" data-correct="false" onclick="checkChoice(this, false)"><div class="opt-badge">A</div> <div class="opt-text">${0,71}$.</div></div><div class="btn-option" data-correct="false" onclick="checkChoice(this, false)"><div class="opt-badge">B</div> <div class="opt-text">${0,45}$.</div></div><div class="btn-option" data-correct="false" onclick="checkChoice(this, false)"><div class="opt-badge">C</div> <div class="opt-text">${0,80}$.</div></div><div class="btn-option" data-correct="true" onclick="checkChoice(this, true)"><div class="opt-badge">D</div> <div class="opt-text">${0,13}$.</div></div></div><div class="actions-area"><button class="btn-action btn-reveal" onclick="revealAnswerMC(this)">👁 HIỆN ĐÁP ÁN</button><div class="slide-counter" id="counter-2">Câu ? / ?</div><button class="btn-action btn-explain" onclick="toggleExpl(this)">💡 XEM LỜI GIẢI</button></div><div class="explanation-box"><div class="explanation-title">📝 LỜI GIẢI CHI TIẾT:</div><div class="explanation-content">Cho hai biến cố ${A}$ và ${B}$ có $P(B)=0,27, P(A|B)= 0,53$. Tính xác suất $P(\overline{A}B)$ (kết quả làm tròn đến hàng phần trăm).<br><br>A. ${0,71}$.	   B. ${0,45}$.	    C. ${0,80}$.	     D. ${0,13}$.<br><br>Lời giải:<br> Chọn D <br> Theo công thức nhân xác suất, ta có $P(AB) = P(B)P(A|B) = 0,27.0,53=0,14$.<br><br>Vì $\overline{A}B$ và ${AB}$ là hai biên cố xung khắc và $\overline{A}B \cup AB=B$ nên:<br><br>$P(\overline{A}B)=P(B)-P(AB)=0,13$.</div></div></div></div><div class="slide-container" id="slide-3"><div class="q-header"><div class="header-left"><div class="part-badge">PHẦN I (Trắc nghiệm)</div></div><div class="header-right"><button class="zoom-btn" onclick="changeFontSize(-2)" title="Giảm cỡ chữ">A-</button><button class="zoom-btn" onclick="changeFontSize(2)" title="Tăng cỡ chữ">A+</button><div class="timer" onclick="startTimer(this)" ondblclick="editTimer(this)" data-time="60" title="Click: Chạy/Dừng. Click đúp: Sửa thời gian.">⏳ Bắt đầu (01:00)</div><button class="btn-exit-html" onclick="document.title='EXIT_FULL_SCREEN'" title="Thoát chế độ trình chiếu (Phím Esc)">❌ Thoát</button></div></div><div class="content-wrapper"><div class="question-content"><span class="q-label">Câu 4:</span> Một hộp có ${26}$ viên bi cùng kích thước và khối lượng, trong đó có ${12}$ viên bi màu nâu và ${14}$ viên bi màu hồng. Lấy ngẫu nhiên lần lượt ${2}$ viên bi và không hoàn lại. Tính xác suất để lấy được viên bi thứ hai có màu hồng, biết rằng viên bi thứ nhất có màu nâu.</div><div class="options-stack"><div class="btn-option" data-correct="false" onclick="checkChoice(this, false)"><div class="opt-badge">A</div> <div class="opt-text">$\frac{12}{25}$.</div></div><div class="btn-option" data-correct="false" onclick="checkChoice(this, false)"><div class="opt-badge">B</div> <div class="opt-text">$\frac{7}{12}$.</div></div><div class="btn-option" data-correct="false" onclick="checkChoice(this, false)"><div class="opt-badge">C</div> <div class="opt-text">$\frac{7}{13}$.</div></div><div class="btn-option" data-correct="true" onclick="checkChoice(this, true)"><div class="opt-badge">D</div> <div class="opt-text">$\frac{14}{25}$.</div></div></div><div class="actions-area"><button class="btn-action btn-reveal" onclick="revealAnswerMC(this)">👁 HIỆN ĐÁP ÁN</button><div class="slide-counter" id="counter-3">Câu ? / ?</div><button class="btn-action btn-explain" onclick="toggleExpl(this)">💡 XEM LỜI GIẢI</button></div><div class="explanation-box"><div class="explanation-title">📝 LỜI GIẢI CHI TIẾT:</div><div class="explanation-content">Một hộp có ${26}$ viên bi cùng kích thước và khối lượng, trong đó có ${12}$ viên bi màu nâu và ${14}$ viên bi màu hồng. Lấy ngẫu nhiên lần lượt ${2}$ viên bi và không hoàn lại. Tính xác suất để lấy được viên bi thứ hai có màu hồng, biết rằng viên bi thứ nhất có màu nâu.<br><br>A. $\frac{12}{25}$.	   B. $\frac{7}{12}$.	    C. $\frac{7}{13}$.	     D. $\frac{14}{25}$.<br><br>Lời giải:<br> Chọn D <br> Gọi A là biến cố "Lấy được viên bi thứ hai có màu hồng";<br><br>Gọi B là biến cố "Lấy được viên bi thứ nhất có màu nâu";<br><br>Khi đó xác suất để lấy được viên bi thứ hai có màu hồng, biết rằng viên bi thứ nhất có màu nâuchính là xác suất của A với điều kiện B.<br><br>Vì một viên bi màu nâu đã được lấy ra ở lần thứ nhất nên trong hộp còn lại ${25}$ viên bi, trong đó có ${14}$ viên bi xanh.<br><br> Xác suất cần tính là: $P=\dfrac{14}{25}=\frac{14}{25}$.<br><br>$P=\frac{14}{25}$.</div></div></div></div><div class="slide-container" id="slide-4"><div class="q-header"><div class="header-left"><div class="part-badge">PHẦN I (Trắc nghiệm)</div></div><div class="header-right"><button class="zoom-btn" onclick="changeFontSize(-2)" title="Giảm cỡ chữ">A-</button><button class="zoom-btn" onclick="changeFontSize(2)" title="Tăng cỡ chữ">A+</button><div class="timer" onclick="startTimer(this)" ondblclick="editTimer(this)" data-time="60" title="Click: Chạy/Dừng. Click đúp: Sửa thời gian.">⏳ Bắt đầu (01:00)</div><button class="btn-exit-html" onclick="document.title='EXIT_FULL_SCREEN'" title="Thoát chế độ trình chiếu (Phím Esc)">❌ Thoát</button></div></div><div class="content-wrapper"><div class="question-content"><span class="q-label">Câu 5:</span> Câu lạc bộ thể thao của nhà trường gồm ${31}$ thành viên, mỗi thành viên biết chơi ít nhất một trong hai môn cầu lông hoặc cờ tướng. Biết rằng có ${22}$ thành viên biết chơi cầu lông và ${19}$ thành viên biết chơi cờ tướng. Chọn ngẫu nhiên 1 thành viên của câu lạc bộ. Tính xác suất thành viên được chọn biết chơi cầu lông, biết rằng thành viên đó biết chơi cờ tướng.</div><div class="options-stack"><div class="btn-option" data-correct="true" onclick="checkChoice(this, true)"><div class="opt-badge">A</div> <div class="opt-text">$\frac{10}{19}$.</div></div><div class="btn-option" data-correct="false" onclick="checkChoice(this, false)"><div class="opt-badge">B</div> <div class="opt-text">$\frac{10}{31}$.</div></div><div class="btn-option" data-correct="false" onclick="checkChoice(this, false)"><div class="opt-badge">C</div> <div class="opt-text">$\frac{5}{11}$.</div></div><div class="btn-option" data-correct="false" onclick="checkChoice(this, false)"><div class="opt-badge">D</div> <div class="opt-text">$\frac{22}{31}$.</div></div></div><div class="actions-area"><button class="btn-action btn-reveal" onclick="revealAnswerMC(this)">👁 HIỆN ĐÁP ÁN</button><div class="slide-counter" id="counter-4">Câu ? / ?</div><button class="btn-action btn-explain" onclick="toggleExpl(this)">💡 XEM LỜI GIẢI</button></div><div class="explanation-box"><div class="explanation-title">📝 LỜI GIẢI CHI TIẾT:</div><div class="explanation-content">Câu lạc bộ thể thao của nhà trường gồm ${31}$ thành viên, mỗi thành viên biết chơi ít nhất một trong hai môn cầu lông hoặc cờ tướng. Biết rằng có ${22}$ thành viên biết chơi cầu lông và ${19}$ thành viên biết chơi cờ tướng. Chọn ngẫu nhiên 1 thành viên của câu lạc bộ. Tính xác suất thành viên được chọn biết chơi cầu lông, biết rằng thành viên đó biết chơi cờ tướng.<br><br>A. $\frac{10}{19}$.	   B. $\frac{10}{31}$.	    C. $\frac{5}{11}$.	     D. $\frac{22}{31}$.<br><br>Lời giải:<br> Chọn A <br> Gọi A là biến cố "Thành viên được chọn biết chơi cờ tướng" và B là biến cố "Thành viên được chọn biết chơi cầu lông".<br><br>Số thành viên của câu lạc bộ biết chơi cả hai môn là: $22+19-31=10.$<br><br>Do đó, trong số ${19}$ thành viên biết chơi cờ tướng, có đúng ${10}$ thành viên biết chơi cầu lông.<br><br>Vậy nên xác suất thành viên được chọn biết chơi cầu lông, biết rằng thành viên đó biết chơi cờ tướng là:<br><br>$P(B|A)=\dfrac{10}{19}$.<br><br>$P(B|A)=\frac{10}{19}$.</div></div></div></div><div class="slide-container" id="slide-5"><div class="q-header"><div class="header-left"><div class="part-badge">PHẦN I (Trắc nghiệm)</div></div><div class="header-right"><button class="zoom-btn" onclick="changeFontSize(-2)" title="Giảm cỡ chữ">A-</button><button class="zoom-btn" onclick="changeFontSize(2)" title="Tăng cỡ chữ">A+</button><div class="timer" onclick="startTimer(this)" ondblclick="editTimer(this)" data-time="60" title="Click: Chạy/Dừng. Click đúp: Sửa thời gian.">⏳ Bắt đầu (01:00)</div><button class="btn-exit-html" onclick="document.title='EXIT_FULL_SCREEN'" title="Thoát chế độ trình chiếu (Phím Esc)">❌ Thoát</button></div></div><div class="content-wrapper"><div class="question-content"><span class="q-label">Câu 6:</span> Cho hai biến cố ${A}$, ${F}$ với $P(F)=0,65$; $P(A|F) =0,12$ và $P\left(A|\overline{F}\right)=0,60$. Tính xác suất $P(A)$ (kết quả làm tròn đến hàng phần trăm).</div><div class="options-stack"><div class="btn-option" data-correct="false" onclick="checkChoice(this, false)"><div class="opt-badge">A</div> <div class="opt-text">${0,16}$.</div></div><div class="btn-option" data-correct="false" onclick="checkChoice(this, false)"><div class="opt-badge">B</div> <div class="opt-text">${0,97}$.</div></div><div class="btn-option" data-correct="true" onclick="checkChoice(this, true)"><div class="opt-badge">C</div> <div class="opt-text">${0,29}$.</div></div><div class="btn-option" data-correct="false" onclick="checkChoice(this, false)"><div class="opt-badge">D</div> <div class="opt-text">${0,89}$.</div></div></div><div class="actions-area"><button class="btn-action btn-reveal" onclick="revealAnswerMC(this)">👁 HIỆN ĐÁP ÁN</button><div class="slide-counter" id="counter-5">Câu ? / ?</div><button class="btn-action btn-explain" onclick="toggleExpl(this)">💡 XEM LỜI GIẢI</button></div><div class="explanation-box"><div class="explanation-title">📝 LỜI GIẢI CHI TIẾT:</div><div class="explanation-content">Cho hai biến cố ${A}$, ${F}$ với $P(F)=0,65$; $P(A|F) =0,12$ và $P\left(A|\overline{F}\right)=0,60$. Tính xác suất $P(A)$ (kết quả làm tròn đến hàng phần trăm).<br>A. ${0,16}$.	   B. ${0,97}$.	    C. ${0,29}$.	     D. ${0,89}$.<br><br>Lời giải:<br> Chọn C <br> Ta có: $P(\overline{F})=1-P(F)=0,35$.<br><br>Áp dụng công thức toàn phần ta có:<br><br>$P(A) = P(A|F). P(F) + P\left(A|\overline{F}\right).P\left(\overline{F}\right)$$=0,12.0,65+0,60.0,35=0,29$.</div></div></div></div><div class="slide-container" id="slide-6"><div class="q-header"><div class="header-left"><div class="part-badge">PHẦN I (Trắc nghiệm)</div></div><div class="header-right"><button class="zoom-btn" onclick="changeFontSize(-2)" title="Giảm cỡ chữ">A-</button><button class="zoom-btn" onclick="changeFontSize(2)" title="Tăng cỡ chữ">A+</button><div class="timer" onclick="startTimer(this)" ondblclick="editTimer(this)" data-time="60" title="Click: Chạy/Dừng. Click đúp: Sửa thời gian.">⏳ Bắt đầu (01:00)</div><button class="btn-exit-html" onclick="document.title='EXIT_FULL_SCREEN'" title="Thoát chế độ trình chiếu (Phím Esc)">❌ Thoát</button></div></div><div class="content-wrapper"><div class="question-content"><span class="q-label">Câu 7:</span> Cho hai biến cố ${D}$, ${A}$ với $P(D)=0,32$; $P(D|A) =0,46$ và $P\left(D|\overline{A}\right)=0,05$. Tính xác suất $P(A)$ (kết quả làm tròn đến hàng phần trăm).</div><div class="options-stack"><div class="btn-option" data-correct="false" onclick="checkChoice(this, false)"><div class="opt-badge">A</div> <div class="opt-text">${0,69}$.</div></div><div class="btn-option" data-correct="true" onclick="checkChoice(this, true)"><div class="opt-badge">B</div> <div class="opt-text">${0,66}$.</div></div><div class="btn-option" data-correct="false" onclick="checkChoice(this, false)"><div class="opt-badge">C</div> <div class="opt-text">${0,94}$.</div></div><div class="btn-option" data-correct="false" onclick="checkChoice(this, false)"><div class="opt-badge">D</div> <div class="opt-text">${0,59}$.</div></div></div><div class="actions-area"><button class="btn-action btn-reveal" onclick="revealAnswerMC(this)">👁 HIỆN ĐÁP ÁN</button><div class="slide-counter" id="counter-6">Câu ? / ?</div><button class="btn-action btn-explain" onclick="toggleExpl(this)">💡 XEM LỜI GIẢI</button></div><div class="explanation-box"><div class="explanation-title">📝 LỜI GIẢI CHI TIẾT:</div><div class="explanation-content">Cho hai biến cố ${D}$, ${A}$ với $P(D)=0,32$; $P(D|A) =0,46$ và $P\left(D|\overline{A}\right)=0,05$. Tính xác suất $P(A)$ (kết quả làm tròn đến hàng phần trăm).<br>A. ${0,69}$.	   B. ${0,66}$.	    C. ${0,94}$.	     D. ${0,59}$.<br><br>Lời giải:<br> Chọn B <br> Đặt $P(A)=x \Rightarrow P(\overline{A})=1-x$.<br><br>Áp dụng công thức toàn phần ta có:<br><br>$P(D) = P(D|A). P(A) + P\left(D|\overline{A}\right).P\left(\overline{A}\right)$<br><br>$\Leftrightarrow 0,32=0,46x+0,05(1-x)$<br><br>$\Rightarrow x=0,66$.</div></div></div></div><div class="slide-container" id="slide-7"><div class="q-header"><div class="header-left"><div class="part-badge">PHẦN I (Trắc nghiệm)</div></div><div class="header-right"><button class="zoom-btn" onclick="changeFontSize(-2)" title="Giảm cỡ chữ">A-</button><button class="zoom-btn" onclick="changeFontSize(2)" title="Tăng cỡ chữ">A+</button><div class="timer" onclick="startTimer(this)" ondblclick="editTimer(this)" data-time="60" title="Click: Chạy/Dừng. Click đúp: Sửa thời gian.">⏳ Bắt đầu (01:00)</div><button class="btn-exit-html" onclick="document.title='EXIT_FULL_SCREEN'" title="Thoát chế độ trình chiếu (Phím Esc)">❌ Thoát</button></div></div><div class="content-wrapper"><div class="question-content"><span class="q-label">Câu 8:</span> Cho ${A,F}$ là các biến cố. Biết $P(F)=0,58$. Nếu ${F}$ xảy ra thì tỉ lệ ${A}$ xảy ra là $39\%$. Nếu ${F}$ không xảy ra thì tỉ lệ ${A}$ xảy ra là $64\%$. Tính xác suất của biến cố ${A}$ (kết quả làm tròn đến hàng phần trăm).</div><div class="options-stack"><div class="btn-option" data-correct="false" onclick="checkChoice(this, false)"><div class="opt-badge">A</div> <div class="opt-text">${0,20}$.</div></div><div class="btn-option" data-correct="false" onclick="checkChoice(this, false)"><div class="opt-badge">B</div> <div class="opt-text">${0,68}$.</div></div><div class="btn-option" data-correct="false" onclick="checkChoice(this, false)"><div class="opt-badge">C</div> <div class="opt-text">${0,36}$.</div></div><div class="btn-option" data-correct="true" onclick="checkChoice(this, true)"><div class="opt-badge">D</div> <div class="opt-text">${0,50}$.</div></div></div><div class="actions-area"><button class="btn-action btn-reveal" onclick="revealAnswerMC(this)">👁 HIỆN ĐÁP ÁN</button><div class="slide-counter" id="counter-7">Câu ? / ?</div><button class="btn-action btn-explain" onclick="toggleExpl(this)">💡 XEM LỜI GIẢI</button></div><div class="explanation-box"><div class="explanation-title">📝 LỜI GIẢI CHI TIẾT:</div><div class="explanation-content">Cho ${A,F}$ là các biến cố. Biết $P(F)=0,58$. Nếu ${F}$ xảy ra thì tỉ lệ ${A}$ xảy ra là $39\%$. Nếu ${F}$ không xảy ra thì tỉ lệ ${A}$ xảy ra là $64\%$. Tính xác suất của biến cố ${A}$ (kết quả làm tròn đến hàng phần trăm).<br>A. ${0,20}$.	   B. ${0,68}$.	    C. ${0,36}$.	     D. ${0,50}$.<br><br>Lời giải:<br> Chọn D <br> Ta có: $P(\overline{F})=1-P(F)=0,42, P(A|F)=0,39, P(A|\overline{F})=0,64$.<br><br>$P(A)=P(A|F).P(F)+P(A|\overline{F}).P(\overline{F})$ $=0,39.0,58+0,64.0,42=0,50$.</div></div></div></div><div class="slide-container" id="slide-8"><div class="q-header"><div class="header-left"><div class="part-badge">PHẦN I (Trắc nghiệm)</div></div><div class="header-right"><button class="zoom-btn" onclick="changeFontSize(-2)" title="Giảm cỡ chữ">A-</button><button class="zoom-btn" onclick="changeFontSize(2)" title="Tăng cỡ chữ">A+</button><div class="timer" onclick="startTimer(this)" ondblclick="editTimer(this)" data-time="60" title="Click: Chạy/Dừng. Click đúp: Sửa thời gian.">⏳ Bắt đầu (01:00)</div><button class="btn-exit-html" onclick="document.title='EXIT_FULL_SCREEN'" title="Thoát chế độ trình chiếu (Phím Esc)">❌ Thoát</button></div></div><div class="content-wrapper"><div class="question-content"><span class="q-label">Câu 9:</span> Tỉ lệ người dân đã tiêm vắc xin phòng bệnh X ở một địa phương là $51\%$. Trong số những người đã tiêm phòng, tỉ lệ mắc bệnh X là $15\%$, còn trong số những người chưa tiêm, tỉ lệ mắc bệnh X là $72\%$. Gặp ngẫu nhiên một người ở địa phương đó. Xác suất người đó mắc bệnh X là (kết quả làm tròn đến hàng phần trăm).</div><div class="options-stack"><div class="btn-option" data-correct="false" onclick="checkChoice(this, false)"><div class="opt-badge">A</div> <div class="opt-text">${0,93}$.</div></div><div class="btn-option" data-correct="true" onclick="checkChoice(this, true)"><div class="opt-badge">B</div> <div class="opt-text">${0,43}$.</div></div><div class="btn-option" data-correct="false" onclick="checkChoice(this, false)"><div class="opt-badge">C</div> <div class="opt-text">${0,02}$.</div></div><div class="btn-option" data-correct="false" onclick="checkChoice(this, false)"><div class="opt-badge">D</div> <div class="opt-text">${0,38}$.</div></div></div><div class="actions-area"><button class="btn-action btn-reveal" onclick="revealAnswerMC(this)">👁 HIỆN ĐÁP ÁN</button><div class="slide-counter" id="counter-8">Câu ? / ?</div><button class="btn-action btn-explain" onclick="toggleExpl(this)">💡 XEM LỜI GIẢI</button></div><div class="explanation-box"><div class="explanation-title">📝 LỜI GIẢI CHI TIẾT:</div><div class="explanation-content">Tỉ lệ người dân đã tiêm vắc xin phòng bệnh X ở một địa phương là $51\%$. Trong số những người đã tiêm phòng, tỉ lệ mắc bệnh X là $15\%$, còn trong số những người chưa tiêm, tỉ lệ mắc bệnh X là $72\%$. Gặp ngẫu nhiên một người ở địa phương đó. Xác suất người đó mắc bệnh X là (kết quả làm tròn đến hàng phần trăm).<br>A. ${0,93}$.	   B. ${0,43}$.	    C. ${0,02}$.	     D. ${0,38}$.<br><br>Lời giải:<br> Chọn B <br>  Gọi ${M}$ là biến cố "người được gặp mắc bệnh".<br><br> Gọi ${T}$ là biến cố "người được gặp đã tiêm phòng vắc xin".<br><br> Suy ra $\overline{T}$ là biến cố "người được gặp chưa tiêm phòng vắc xin".<br><br>Áp dụng công thức toàn phần ta có:<br><br>$P(M) = P(M|T). P(T) + P\left(M|\overline{T}\right).P\left(\overline{T}\right)$$=0,15.0,51+0,72.0,49=0,43$.</div></div></div></div><div class="slide-container" id="slide-9"><div class="q-header"><div class="header-left"><div class="part-badge">PHẦN III (Trả lời ngắn)</div></div><div class="header-right"><button class="zoom-btn" onclick="changeFontSize(-2)" title="Giảm cỡ chữ">A-</button><button class="zoom-btn" onclick="changeFontSize(2)" title="Tăng cỡ chữ">A+</button><div class="timer" onclick="startTimer(this)" ondblclick="editTimer(this)" data-time="60" title="Click: Chạy/Dừng. Click đúp: Sửa thời gian.">⏳ Bắt đầu (01:00)</div><button class="btn-exit-html" onclick="document.title='EXIT_FULL_SCREEN'" title="Thoát chế độ trình chiếu (Phím Esc)">❌ Thoát</button></div></div><div class="content-wrapper"><div class="question-content"><span class="q-label">Câu 1:</span> Trong một kì thi tốt nghiệp trung học phổ thông, một tỉnh X có $73 \%$ học sinh lựa chọn tổ hợp C00 (gồm các môn Ngữ văn, Lịch sử, Địa lí). Biết rằng, nếu một học sinh chọn tổ hợp C00 thì xác suất để học sinh đó đỗ đại học là ${0,75}$; còn nếu một học sinh không chọn tổ hợp C00 thì xác suất để học sinh đó đỗ đại học là ${0,63}$. Chọn ngẫu nhiên một học sinh của tỉnh X đã tốt nghiệp trung học phổ thông trong kì thi trên. Tính xác suất để học sinh đó đỗ đại học.(kết quả làm tròn đến hàng phần trăm)</div><div class="short-answer-area"><div class="input-group"><input type="text" class="answer-input" id="input-9" placeholder="Nhập kết quả..." onkeyup="handleEnter(event, 9, 'MCw3Mg==')"></div></div><div class="actions-area"><button class="btn-action btn-check" id="btn-chk-9" onclick="checkShort(this, 'MCw3Mg==')">✓ KIỂM TRA</button><button class="btn-action btn-reveal" onclick="revealShort(this, 'MCw3Mg==')">👁 ĐÁP ÁN</button><div class="slide-counter" id="counter-9">Câu ? / ?</div><button class="btn-action btn-explain" onclick="toggleExpl(this)">💡 XEM LỜI GIẢI</button></div><div class="explanation-box"><div class="explanation-title">📝 LỜI GIẢI CHI TIẾT:</div><div class="explanation-content">Trong một kì thi tốt nghiệp trung học phổ thông, một tỉnh X có $73 \%$ học sinh lựa chọn tổ hợp C00 (gồm các môn Ngữ văn, Lịch sử, Địa lí). Biết rằng, nếu một học sinh chọn tổ hợp C00 thì xác suất để học sinh đó đỗ đại học là ${0,75}$; còn nếu một học sinh không chọn tổ hợp C00 thì xác suất để học sinh đó đỗ đại học là ${0,63}$. Chọn ngẫu nhiên một học sinh của tỉnh X đã tốt nghiệp trung học phổ thông trong kì thi trên. Tính xác suất để học sinh đó đỗ đại học.(kết quả làm tròn đến hàng phần trăm)<br><br>Lời giải:<br> Gọi $A$ là biến cố: Học sinh đó chọn tổ hợp C00; $B$ là biến cố: Học sinh đó đỗ đại học.<br><br>$P(A)=0,73,P(\overline{A})=1-P(A)=0,27$.<br><br>$P(B|A)$ là xác suất để một học sinh đỗ đại học với điều kiện học sinh đó chọn tổ hợp C00.<br><br>$\Rightarrow P(B|A)=0,75$.<br><br>$P(B|\overline{A})$ là xác suất để một học sinh đỗ đại học với điều kiện học sinh đó chọn tổ hợp C00.<br><br>$\Rightarrow P(B|\overline{A})=0,63$.<br><br>Thay vào công thức xác suất toàn phần ta được:<br><br>$P(B)=P(A).P(B|A)+P(\overline{A}).P(B|\overline{A})=0,73.0,75+0,27.0,63=0,72$. <br>Đáp án: 0,72</div></div></div></div>
+        
+            <script>
+                let currentSlide = 0; let slides = []; let timerInterval;
+                
+                let audioCtx = null;
+                function getAudioCtx(){
+                    if(!audioCtx){
+                        const Ctx = window.AudioContext || window.webkitAudioContext;
+                        if(Ctx) audioCtx = new Ctx();
+                    }
+                    return audioCtx;
+                }
+
+                function playSound(type) {
+                    const ctx = getAudioCtx();
+                    if (!ctx) return;
+                    if (ctx.state === 'suspended') ctx.resume();
+                    const oscillator = ctx.createOscillator();
+                    const gainNode = ctx.createGain();
+                    oscillator.connect(gainNode);
+                    gainNode.connect(ctx.destination);
+                    const now = ctx.currentTime;
+                    
+                    if (type === 'correct') { 
+                        if(navigator.vibrate) navigator.vibrate([100, 50, 100]); // Rung 2 nhịp vui vẻ
+                        oscillator.type = 'sine';
+                        oscillator.frequency.setValueAtTime(800, now);
+                        oscillator.frequency.exponentialRampToValueAtTime(1200, now + 0.1);
+                        gainNode.gain.setValueAtTime(1.5, now);
+                        gainNode.gain.exponentialRampToValueAtTime(0.01, now + 0.3);
+                        oscillator.start(now); oscillator.stop(now + 0.3);
+                    } else if (type === 'wrong') { 
+                        if(navigator.vibrate) navigator.vibrate(200); // Rung 1 nhịp dài cảnh báo
+                        oscillator.type = 'sawtooth';
+                        oscillator.frequency.setValueAtTime(150, now);
+                        oscillator.frequency.exponentialRampToValueAtTime(100, now + 0.2);
+                        gainNode.gain.setValueAtTime(1.2, now);
+                        gainNode.gain.exponentialRampToValueAtTime(0.01, now + 0.3);
+                        oscillator.start(now); oscillator.stop(now + 0.3);
+                    } else if (type === 'timeup') { 
+                        oscillator.type = 'square';
+                        oscillator.frequency.setValueAtTime(400, now);
+                        gainNode.gain.setValueAtTime(1.5, now);
+                        gainNode.gain.setValueAtTime(1.5, now + 0.1);
+                        gainNode.gain.setValueAtTime(0, now + 0.15);
+                        gainNode.gain.setValueAtTime(1.5, now + 0.2);
+                        gainNode.gain.setValueAtTime(1.5, now + 0.3);
+                        gainNode.gain.setValueAtTime(0, now + 0.35);
+                        gainNode.gain.setValueAtTime(1.5, now + 0.4);
+                        gainNode.gain.exponentialRampToValueAtTime(0.01, now + 1.0);
+                        oscillator.start(now); oscillator.stop(now + 1.0);
+                    } else if (type === 'tick') { 
+                        oscillator.type = 'triangle';
+                        oscillator.frequency.setValueAtTime(1000, now);
+                        gainNode.gain.setValueAtTime(0.8, now);
+                        gainNode.gain.exponentialRampToValueAtTime(0.01, now + 0.1);
+                        oscillator.start(now); oscillator.stop(now + 0.1);
+                    }
+                }
+                
+                const msgCorrect = ["Tuyệt vời!", "Chính xác!", "Quá đỉnh!", "Xuất sắc!", "Giỏi quá!", "10 Điểm!"];
+                const msgWrong = ["Cố lên nhé!", "Chưa chính xác!", "Hãy thử lại!", "Cẩn thận hơn!", "Đừng nản chí!", "Suýt nữa thì đúng!"];
+
+                function showFeedback(isCorrect, slideElement) {
+                    let popup = document.createElement('div');
+                    popup.className = 'feedback-popup ' + (isCorrect ? 'correct' : 'wrong');
+                    let emoji = isCorrect ? '😄' : '😢';
+                    let textArr = isCorrect ? msgCorrect : msgWrong;
+                    let randomText = textArr[Math.floor(Math.random() * textArr.length)];
+                    popup.innerHTML = '<div class="emoji">' + emoji + '</div><div class="message">' + randomText + '</div>';
+                    slideElement.appendChild(popup);
+                    setTimeout(() => popup.classList.add('pop'), 10);
+                    setTimeout(() => { popup.classList.remove('pop'); setTimeout(() => popup.remove(), 400); }, 1500);
+                }
+
+                function changeFontSize(delta) {
+                    const root = document.documentElement; const style = getComputedStyle(root);
+                    let baseSize = parseInt(style.getPropertyValue('--base-size'));
+                    let optSize = parseInt(style.getPropertyValue('--opt-size'));
+                    let badgeSize = parseInt(style.getPropertyValue('--badge-size'));
+                    if ((delta < 0 && baseSize <= 24) || (delta > 0 && baseSize >= 60)) return;
+                    root.style.setProperty('--base-size', (baseSize + delta) + 'px');
+                    root.style.setProperty('--opt-size', (optSize + delta) + 'px');
+                    root.style.setProperty('--badge-size', (badgeSize + (delta > 0 ? 2 : -2)) + 'px');
+                }
+                function formatTime(seconds) {
+                    let m = Math.floor(seconds / 60); let s = seconds % 60;
+                    return (m < 10 ? "0" : "") + m + ":" + (s < 10 ? "0" : "") + s;
+                }
+                function parseTime(input) {
+                    if (!input) return null; input = input.toString().trim();
+                    if (input.includes(":")) {
+                        let parts = input.split(":"); return (parseInt(parts[0]) || 0) * 60 + (parseInt(parts[1]) || 0);
+                    }
+                    return parseInt(input);
+                }
+                window.addEventListener("load", function(){ 
+                    document.addEventListener('keydown', function(e) {
+                        const tag = document.activeElement.tagName;
+                        if(tag === "INPUT" || tag === "TEXTAREA") return;
+                        if(e.key === "ArrowRight") nextSlide(); if(e.key === "ArrowLeft") prevSlide();
+                    });
+                });
+                function renderSlide(index) {
+                    document.querySelectorAll('.slide-container').forEach(el => el.classList.remove('active'));
+                    const activeSlide = document.getElementById('slide-' + index);
+                    if (activeSlide) {
+                        activeSlide.classList.add('active'); currentSlide = index;
+                        document.querySelectorAll('.slide-counter').forEach(el => el.innerText = `Câu ${index + 1} / ${slides.length}`);
+                        
+                        if (window.MathJax && !activeSlide.dataset.typeset) {
+                            MathJax.typesetPromise([activeSlide]).then(() => { activeSlide.dataset.typeset = "true"; }).catch((err) => console.log('MJ Error:', err));
+                        }
+                        clearInterval(timerInterval); const timerEl = activeSlide.querySelector('.timer');
+                        if(timerEl) { let def = 60; timerEl.dataset.time = def; timerEl.innerText = '⏳ Bắt đầu (' + formatTime(def) + ')'; timerEl.classList.remove('running'); }
+                        resizeSlideCanvas(activeSlide);
+                        redrawSlideDrawing(activeSlide);
+                    }
+                }
+                function startTimer(el) {
+                    if (el.classList.contains('running')) { clearInterval(timerInterval); el.classList.remove('running'); el.innerText = "⏳ Bắt đầu (" + formatTime(parseInt(el.dataset.time)) + ")"; return; }
+                    let timeLeft = parseInt(el.dataset.time); el.classList.add('running'); el.innerText = formatTime(timeLeft);
+                    clearInterval(timerInterval);
+                    timerInterval = setInterval(() => { 
+                        timeLeft--; el.innerText = formatTime(timeLeft); 
+                        if (timeLeft <= 5 && timeLeft > 0) { playSound('tick'); } 
+                        else if (timeLeft <= 0) { clearInterval(timerInterval); el.classList.remove('running'); el.innerText = "Hết giờ!"; playSound('timeup'); } 
+                    }, 1000);
+                }
+                function editTimer(el) {
+                    if (el.classList.contains('running')) { clearInterval(timerInterval); el.classList.remove('running'); }
+                    let newTime = parseTime(prompt("Nhập thời gian (Ví dụ: 5:00 hoặc 300 giây):", formatTime(parseInt(el.dataset.time))));
+                    if (newTime != null && !isNaN(newTime) && newTime > 0) { el.dataset.time = newTime; el.innerText = "⏳ Bắt đầu (" + formatTime(newTime) + ")"; }
+                }
+                function nextSlide() { if (currentSlide < slides.length - 1) renderSlide(currentSlide + 1); }
+                function prevSlide() { if (currentSlide > 0) renderSlide(currentSlide - 1); }
+                function openImage(src) { const w = window.open(""); w.document.write('<img src="' + src + '" style="max-width:100%;">'); }
+                
+                function checkChoice(btn, isCorrect) {
+                    if (btn.classList.contains('checked')) return; const slide = btn.closest('.slide-container');
+                    if (isCorrect) { 
+                        playSound('correct'); showFeedback(true, slide);
+                        btn.classList.add('correct', 'checked'); slide.querySelectorAll('.btn-option').forEach(b => b.classList.add('disabled')); slide.querySelector('.btn-reveal').style.display='none'; 
+                    } else { 
+                        playSound('wrong'); showFeedback(false, slide); btn.classList.add('wrong', 'checked'); 
+                    }
+                }
+                function revealAnswerMC(btn) {
+                    const slide = btn.closest('.slide-container'); const corr = slide.querySelector('.btn-option[data-correct="true"]');
+                    if(corr) corr.classList.add('correct', 'checked'); slide.querySelectorAll('.btn-option').forEach(b => b.classList.add('disabled')); btn.style.display='none';
+                }
+                
+                function checkTF(btn, userChoice) {
+                    const row = btn.closest('.tf-row'); row.querySelectorAll('.btn-tf').forEach(b => b.classList.remove('user-correct', 'user-wrong'));
+                    const slideContainer = btn.closest('.slide-container');
+                    if (userChoice === (row.getAttribute('data-correct') === 'true')) { 
+                        playSound('correct'); showFeedback(true, slideContainer); btn.classList.add('user-correct'); 
+                    } else { 
+                        playSound('wrong'); showFeedback(false, slideContainer); btn.classList.add('user-wrong'); 
+                    }
+                }
+                function revealAnswerTF(btn) {
+                    const slide = btn.closest('.slide-container');
+                    slide.querySelectorAll('.tf-row').forEach(row => {
+                        const isTrue = row.getAttribute('data-correct') === 'true';
+                        row.querySelectorAll('.btn-tf').forEach(b => {
+                            if(b.innerText==='Đ' && isTrue) b.classList.add('reveal-true');
+                            if(b.innerText==='S' && !isTrue) b.classList.add('reveal-false');
+                        });
+                    }); btn.style.display='none';
+                }
+                
+                function checkShort(btn, b64) {
+                    const slide = btn.closest('.slide-container'); const inp = slide.querySelector('input');
+                    let val = inp.value.trim().toLowerCase().replace(',', '.').replace(/\s+/g, '');
+                    let ans = decodeURIComponent(escape(atob(b64))).trim().toLowerCase().replace(',', '.');
+                    if (ans === "") { inp.style.borderColor='#f59e0b'; alert('Câu này không tìm thấy đáp án chuẩn.'); return; }
+                    if(val === ans) { 
+                        playSound('correct'); showFeedback(true, slide); inp.style.borderColor='#22c55e'; inp.style.color='#15803d'; 
+                    } else { 
+                        playSound('wrong'); showFeedback(false, slide); inp.style.borderColor='#ef4444'; 
+                    }
+                }
+                function revealShort(btn, b64) {
+                    const slide = btn.closest('.slide-container'); const input = slide.querySelector('input');
+                    let decoded = decodeURIComponent(escape(atob(b64)));
+                    input.value = decoded; btn.style.display='none';
+                }
+                function toggleExpl(btn) { const box = btn.closest('.slide-container').querySelector('.explanation-box'); box.style.display = box.style.display==='block' ? 'none' : 'block'; }
+                function handleEnter(e, id, b64) { if (e.key === "Enter") checkShort(document.getElementById('btn-chk-'+id), b64); }
+                function initSlides(data) { slides = data; initPresentationDrawTools(); renderSlide(0); }
+                function initImageZoom() {
+                    const images = document.querySelectorAll('.real-image');
+                    images.forEach(img => {
+                        img.addEventListener('wheel', function(e) {
+                            e.preventDefault(); let currentHeight = img.clientHeight; let delta = e.deltaY < 0 ? 40 : -40; let newHeight = currentHeight + delta;
+                            if (newHeight >= 150 && newHeight <= 1200) { img.style.maxHeight = 'none'; img.style.height = newHeight + 'px'; img.style.width = 'auto'; }
+                        });
+                    });
+                }
+
+
+                // --- CÔNG CỤ VẼ / CỤC TẨY CHO TRÌNH CHIẾU ---
+                const DRAW_COLORS = { red: '#ff5a47', blue: '#3b82f6', green: '#16a34a' };
+                function ensureDrawLayer(slide) {
+                    if (!slide || slide.__drawReady) return;
+                    slide.__drawReady = true;
+                    slide.__drawState = { paths: [], currentTool: 'pen', currentColor: 'red', drawing: false, currentPath: null, isDrawingMode: false };
+
+                    const headerRight = slide.querySelector('.header-right');
+                    if (headerRight) {
+                        const zoomPlus = headerRight.querySelector('.zoom-btn:last-of-type');
+                        const toolbar = document.createElement('div');
+                        toolbar.className = 'draw-toolbar';
+                        toolbar.innerHTML = `
+                            <div class="draw-sep"></div>
+                            <button class="draw-btn pen-btn active" type="button" title="Bút vẽ">✏️</button>
+                            <button class="draw-btn eraser-btn" type="button" title="Cục tẩy">🧽</button>
+                            <button class="color-btn active" type="button" data-color="red" title="Màu đỏ"></button>
+                            <button class="color-btn" type="button" data-color="blue" title="Màu xanh dương"></button>
+                            <button class="color-btn" type="button" data-color="green" title="Màu xanh lá"></button>
+                            <button class="draw-btn clear-btn" type="button" title="Xóa toàn bộ nét vẽ">🗑️</button>
+                        `;
+                        const timer = headerRight.querySelector('.timer');
+                        headerRight.insertBefore(toolbar, timer || null);
+
+                        toolbar.querySelector('.pen-btn').addEventListener('click', () => toggleSlidePen(slide));
+                        toolbar.querySelector('.eraser-btn').addEventListener('click', () => setSlideTool(slide, 'eraser'));
+                        toolbar.querySelector('.clear-btn').addEventListener('click', () => clearSlideDrawing(slide));
+                        toolbar.querySelectorAll('.color-btn').forEach(btn => {
+                            btn.addEventListener('click', () => setSlideColor(slide, btn.dataset.color));
+                        });
+                    }
+
+                    const canvas = document.createElement('canvas');
+                    canvas.className = 'slide-draw-canvas';
+                    slide.appendChild(canvas);
+                    slide.__drawCanvas = canvas;
+                    slide.__drawCtx = canvas.getContext('2d');
+
+                    const getPos = (evt) => {
+                        const rect = canvas.getBoundingClientRect();
+                        return { x: evt.clientX - rect.left, y: evt.clientY - rect.top };
+                    };
+
+                    canvas.addEventListener('pointerdown', (evt) => {
+                        const state = slide.__drawState;
+                        if (!state.isDrawingMode || (!slide.classList.contains('draw-mode-pen') && !slide.classList.contains('draw-mode-eraser'))) return;
+                        evt.preventDefault();
+                        const pos = getPos(evt);
+                        state.drawing = true;
+                        try { canvas.setPointerCapture(evt.pointerId); } catch (e) {}
+                        if (state.currentTool === 'pen') {
+                            state.currentPath = { color: state.currentColor, points: [pos] };
+                            state.paths.push(state.currentPath);
+                            redrawSlideDrawing(slide);
+                        } else {
+                            eraseAtPoint(slide, pos.x, pos.y);
+                        }
+                    });
+
+                    canvas.addEventListener('pointermove', (evt) => {
+                        const state = slide.__drawState;
+                        if (!state.drawing || !state.isDrawingMode) return;
+                        evt.preventDefault();
+                        const pos = getPos(evt);
+                        if (state.currentTool === 'pen') {
+                            if (state.currentPath) state.currentPath.points.push(pos);
+                            redrawSlideDrawing(slide);
+                        } else {
+                            eraseAtPoint(slide, pos.x, pos.y);
+                        }
+                    });
+
+                    const stopDraw = (evt) => {
+                        const state = slide.__drawState;
+                        state.drawing = false;
+                        state.currentPath = null;
+                        if (evt) {
+                            try { canvas.releasePointerCapture(evt.pointerId); } catch (e) {}
+                        }
+                    };
+                    canvas.addEventListener('pointerup', stopDraw);
+                    canvas.addEventListener('pointercancel', stopDraw);
+                    canvas.addEventListener('pointerleave', stopDraw);
+
+                    resizeSlideCanvas(slide);
+                    setSlideColor(slide, 'red');
+                    disableSlideDrawing(slide);
+                }
+
+                function updateSlideToolUI(slide) {
+                    const state = slide.__drawState;
+                    const toolbar = slide.querySelector('.draw-toolbar');
+                    if (!toolbar) return;
+                    const penBtn = toolbar.querySelector('.pen-btn');
+                    const eraserBtn = toolbar.querySelector('.eraser-btn');
+                    if (penBtn) penBtn.classList.toggle('active', !!state.isDrawingMode && state.currentTool === 'pen');
+                    if (eraserBtn) eraserBtn.classList.toggle('active', !!state.isDrawingMode && state.currentTool === 'eraser');
+                }
+
+                function disableSlideDrawing(slide) {
+                    ensureDrawLayer(slide);
+                    const state = slide.__drawState;
+                    state.isDrawingMode = false;
+                    state.drawing = false;
+                    state.currentPath = null;
+                    slide.classList.remove('draw-mode-pen', 'draw-mode-eraser');
+                    updateSlideToolUI(slide);
+                }
+
+                function enableSlideDrawing(slide, tool = 'pen') {
+                    ensureDrawLayer(slide);
+                    const state = slide.__drawState;
+                    state.isDrawingMode = true;
+                    state.currentTool = tool;
+                    slide.classList.remove('draw-mode-pen', 'draw-mode-eraser');
+                    slide.classList.add(tool === 'eraser' ? 'draw-mode-eraser' : 'draw-mode-pen');
+                    updateSlideToolUI(slide);
+                }
+
+                function toggleSlidePen(slide) {
+                    ensureDrawLayer(slide);
+                    const state = slide.__drawState;
+                    if (state.isDrawingMode && state.currentTool === 'pen') {
+                        disableSlideDrawing(slide);
+                    } else {
+                        enableSlideDrawing(slide, 'pen');
+                    }
+                }
+
+                function setSlideTool(slide, tool) {
+                    ensureDrawLayer(slide);
+                    const state = slide.__drawState;
+                    if (tool === 'eraser') {
+                        if (!state.isDrawingMode) return;
+                        enableSlideDrawing(slide, 'eraser');
+                    } else {
+                        enableSlideDrawing(slide, 'pen');
+                    }
+                }
+
+                function setSlideColor(slide, colorName) {
+                    ensureDrawLayer(slide);
+                    const state = slide.__drawState;
+                    if (!DRAW_COLORS[colorName]) return;
+                    state.currentColor = colorName;
+                    const toolbar = slide.querySelector('.draw-toolbar');
+                    if (toolbar) {
+                        toolbar.querySelectorAll('.color-btn').forEach(btn => btn.classList.toggle('active', btn.dataset.color === colorName));
+                    }
+                    if (state.isDrawingMode) {
+                        enableSlideDrawing(slide, 'pen');
+                    } else {
+                        updateSlideToolUI(slide);
+                    }
+                }
+
+                function clearSlideDrawing(slide) {
+                    ensureDrawLayer(slide);
+                    slide.__drawState.paths = [];
+                    slide.__drawState.currentPath = null;
+                    redrawSlideDrawing(slide);
+                }
+
+                function eraseAtPoint(slide, x, y) {
+                    const state = slide.__drawState;
+                    const radius = 22;
+                    const radius2 = radius * radius;
+                    state.paths = state.paths.filter(path => {
+                        return !path.points.some(p => {
+                            const dx = p.x - x;
+                            const dy = p.y - y;
+                            return dx * dx + dy * dy <= radius2;
+                        });
+                    });
+                    redrawSlideDrawing(slide);
+                }
+
+                function resizeSlideCanvas(slide) {
+                    if (!slide || !slide.__drawCanvas) return;
+                    const canvas = slide.__drawCanvas;
+                    const rect = canvas.getBoundingClientRect();
+                    const dpr = window.devicePixelRatio || 1;
+                    const width = Math.max(1, Math.round(rect.width));
+                    const height = Math.max(1, Math.round(rect.height));
+                    canvas.width = Math.round(width * dpr);
+                    canvas.height = Math.round(height * dpr);
+                    const ctx = slide.__drawCtx;
+                    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+                    redrawSlideDrawing(slide);
+                }
+
+                function redrawSlideDrawing(slide) {
+                    if (!slide || !slide.__drawCanvas) return;
+                    const canvas = slide.__drawCanvas;
+                    const ctx = slide.__drawCtx;
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+                    slide.__drawState.paths.forEach(path => {
+                        if (!path.points || !path.points.length) return;
+                        ctx.beginPath();
+                        ctx.strokeStyle = DRAW_COLORS[path.color] || DRAW_COLORS.red;
+                        ctx.lineWidth = 3;
+                        ctx.lineCap = 'round';
+                        ctx.lineJoin = 'round';
+                        ctx.moveTo(path.points[0].x, path.points[0].y);
+                        for (let i = 1; i < path.points.length; i++) {
+                            ctx.lineTo(path.points[i].x, path.points[i].y);
+                        }
+                        if (path.points.length === 1) {
+                            ctx.lineTo(path.points[0].x + 0.01, path.points[0].y + 0.01);
+                        }
+                        ctx.stroke();
+                    });
+                }
+
+                function initPresentationDrawTools() {
+                    document.querySelectorAll('.slide-container').forEach(slide => ensureDrawLayer(slide));
+                }
+
+                window.addEventListener('resize', () => {
+                    document.querySelectorAll('.slide-container').forEach(slide => resizeSlideCanvas(slide));
+                });
+
+                // --- NÂNG CẤP VUỐT TRÊN MOBILE (SWIPE) ---
+                let touchStartX = 0; let touchEndX = 0;
+                document.addEventListener('touchstart', e => { touchStartX = e.changedTouches[0].screenX; }, {passive: true});
+                document.addEventListener('touchend', e => {
+                    if(document.activeElement.tagName === "INPUT") return; // Chặn vuốt khi đang chạm vào ô nhập đáp án
+                    touchEndX = e.changedTouches[0].screenX;
+                    let diff = touchStartX - touchEndX;
+                    if (Math.abs(diff) > 60) { if (diff > 0) nextSlide(); else prevSlide(); }
+                }, {passive: true});
+            </script>
+        
+        <script>
+            window.addEventListener("DOMContentLoaded", function(){
+                // 🟢 HỆ THỐNG TỰ BÁO LỖI VÀ CHUYỂN HƯỚNG UX
+                try {
+                    const data = [{"title": "Câu 1", "part": 1, "type": "mc", "content": "Cho hai biến cố ${A}$ và ${D}$ có $P(A)=0,46$ và $P(AD)= 0,22$. Tính xác suất $P(D|A)$ (kết quả làm tròn đến hàng phần trăm).", "images": [], "explanation": "Cho hai biến cố ${A}$ và ${D}$ có $P(A)=0,46$ và $P(AD)= 0,22$. Tính xác suất $P(D|A)$ (kết quả làm tròn đến hàng phần trăm).\n\nA. ${0,75}$.\t   B. ${0,08}$.\t    C. ${0,95}$.\t     D. *${0,48}$.\n\nLời giải:\n Chọn D \n $P(D|A)=\\dfrac{P(DA)}{P(A)}=\\dfrac{0,22}{0,46}=0,48$.\n\n \n\n", "options": [{"label": "A", "text": "${0,75}$.", "is_correct": false}, {"label": "B", "text": "${0,08}$.", "is_correct": false}, {"label": "C", "text": "${0,95}$.", "is_correct": false}, {"label": "D", "text": "${0,48}$.", "is_correct": true}], "correct_answer": "", "image_paths": [], "image_lookup": {}}, {"title": "Câu 2", "part": 1, "type": "mc", "content": "Cho hai biến cố ${B}$ và ${C}$ có $P(B)=0,69$ và $P(C|B)=0,19$. Tính xác suất $P(BC)$ (kết quả làm tròn đến hàng phần trăm).", "images": [], "explanation": "Cho hai biến cố ${B}$ và ${C}$ có $P(B)=0,69$ và $P(C|B)=0,19$. Tính xác suất $P(BC)$ (kết quả làm tròn đến hàng phần trăm).\n\nA. ${0,79}$.\t   B. *${0,13}$.\t    C. ${0,60}$.\t     D. ${0,54}$.\n\nLời giải:\n Chọn B \n $P(C|B)=\\dfrac{P(CB)}{P(B)}\\Rightarrow P(BC)=P(B).P(C|B)=0,69.0,19=0,13$.\n\n \n\n", "options": [{"label": "A", "text": "${0,79}$.", "is_correct": false}, {"label": "B", "text": "${0,13}$.", "is_correct": true}, {"label": "C", "text": "${0,60}$.", "is_correct": false}, {"label": "D", "text": "${0,54}$.", "is_correct": false}], "correct_answer": "", "image_paths": [], "image_lookup": {}}, {"title": "Câu 3", "part": 1, "type": "mc", "content": "Cho hai biến cố ${A}$ và ${B}$ có $P(B)=0,27, P(A|B)= 0,53$. Tính xác suất $P(\\overline{A}B)$ (kết quả làm tròn đến hàng phần trăm).", "images": [], "explanation": "Cho hai biến cố ${A}$ và ${B}$ có $P(B)=0,27, P(A|B)= 0,53$. Tính xác suất $P(\\overline{A}B)$ (kết quả làm tròn đến hàng phần trăm).\n\nA. ${0,71}$.\t   B. ${0,45}$.\t    C. ${0,80}$.\t     D. *${0,13}$.\n\nLời giải:\n Chọn D \n Theo công thức nhân xác suất, ta có $P(AB) = P(B)P(A|B) = 0,27.0,53=0,14$.\n\nVì $\\overline{A}B$ và ${AB}$ là hai biên cố xung khắc và $\\overline{A}B \\cup AB=B$ nên:\n\n$P(\\overline{A}B)=P(B)-P(AB)=0,13$. \n\n", "options": [{"label": "A", "text": "${0,71}$.", "is_correct": false}, {"label": "B", "text": "${0,45}$.", "is_correct": false}, {"label": "C", "text": "${0,80}$.", "is_correct": false}, {"label": "D", "text": "${0,13}$.", "is_correct": true}], "correct_answer": "", "image_paths": [], "image_lookup": {}}, {"title": "Câu 4", "part": 1, "type": "mc", "content": "Một hộp có ${26}$ viên bi cùng kích thước và khối lượng, trong đó có ${12}$ viên bi màu nâu và ${14}$ viên bi màu hồng. Lấy ngẫu nhiên lần lượt ${2}$ viên bi và không hoàn lại. Tính xác suất để lấy được viên bi thứ hai có màu hồng, biết rằng viên bi thứ nhất có màu nâu.", "images": [], "explanation": "Một hộp có ${26}$ viên bi cùng kích thước và khối lượng, trong đó có ${12}$ viên bi màu nâu và ${14}$ viên bi màu hồng. Lấy ngẫu nhiên lần lượt ${2}$ viên bi và không hoàn lại. Tính xác suất để lấy được viên bi thứ hai có màu hồng, biết rằng viên bi thứ nhất có màu nâu.\n\nA. $\\frac{12}{25}$.\t   B. $\\frac{7}{12}$.\t    C. $\\frac{7}{13}$.\t     D. *$\\frac{14}{25}$.\n\nLời giải:\n Chọn D \n Gọi A là biến cố \"Lấy được viên bi thứ hai có màu hồng\";\n\nGọi B là biến cố \"Lấy được viên bi thứ nhất có màu nâu\";\n\nKhi đó xác suất để lấy được viên bi thứ hai có màu hồng, biết rằng viên bi thứ nhất có màu nâuchính là xác suất của A với điều kiện B.\n\nVì một viên bi màu nâu đã được lấy ra ở lần thứ nhất nên trong hộp còn lại ${25}$ viên bi, trong đó có ${14}$ viên bi xanh.\n\n Xác suất cần tính là: $P=\\dfrac{14}{25}=\\frac{14}{25}$.\n\n$P=\\frac{14}{25}$. \n\n", "options": [{"label": "A", "text": "$\\frac{12}{25}$.", "is_correct": false}, {"label": "B", "text": "$\\frac{7}{12}$.", "is_correct": false}, {"label": "C", "text": "$\\frac{7}{13}$.", "is_correct": false}, {"label": "D", "text": "$\\frac{14}{25}$.", "is_correct": true}], "correct_answer": "", "image_paths": [], "image_lookup": {}}, {"title": "Câu 5", "part": 1, "type": "mc", "content": "Câu lạc bộ thể thao của nhà trường gồm ${31}$ thành viên, mỗi thành viên biết chơi ít nhất một trong hai môn cầu lông hoặc cờ tướng. Biết rằng có ${22}$ thành viên biết chơi cầu lông và ${19}$ thành viên biết chơi cờ tướng. Chọn ngẫu nhiên 1 thành viên của câu lạc bộ. Tính xác suất thành viên được chọn biết chơi cầu lông, biết rằng thành viên đó biết chơi cờ tướng.", "images": [], "explanation": "Câu lạc bộ thể thao của nhà trường gồm ${31}$ thành viên, mỗi thành viên biết chơi ít nhất một trong hai môn cầu lông hoặc cờ tướng. Biết rằng có ${22}$ thành viên biết chơi cầu lông và ${19}$ thành viên biết chơi cờ tướng. Chọn ngẫu nhiên 1 thành viên của câu lạc bộ. Tính xác suất thành viên được chọn biết chơi cầu lông, biết rằng thành viên đó biết chơi cờ tướng.\n\nA. *$\\frac{10}{19}$.\t   B. $\\frac{10}{31}$.\t    C. $\\frac{5}{11}$.\t     D. $\\frac{22}{31}$.\n\nLời giải:\n Chọn A \n Gọi A là biến cố \"Thành viên được chọn biết chơi cờ tướng\" và B là biến cố \"Thành viên được chọn biết chơi cầu lông\".\n\nSố thành viên của câu lạc bộ biết chơi cả hai môn là: $22+19-31=10.$\n\nDo đó, trong số ${19}$ thành viên biết chơi cờ tướng, có đúng ${10}$ thành viên biết chơi cầu lông.\n\nVậy nên xác suất thành viên được chọn biết chơi cầu lông, biết rằng thành viên đó biết chơi cờ tướng là:\n\n$P(B|A)=\\dfrac{10}{19}$.\n\n$P(B|A)=\\frac{10}{19}$. \n\n", "options": [{"label": "A", "text": "$\\frac{10}{19}$.", "is_correct": true}, {"label": "B", "text": "$\\frac{10}{31}$.", "is_correct": false}, {"label": "C", "text": "$\\frac{5}{11}$.", "is_correct": false}, {"label": "D", "text": "$\\frac{22}{31}$.", "is_correct": false}], "correct_answer": "", "image_paths": [], "image_lookup": {}}, {"title": "Câu 6", "part": 1, "type": "mc", "content": "Cho hai biến cố ${A}$, ${F}$ với $P(F)=0,65$; $P(A|F) =0,12$ và $P\\left(A|\\overline{F}\\right)=0,60$. Tính xác suất $P(A)$ (kết quả làm tròn đến hàng phần trăm).", "images": [], "explanation": "Cho hai biến cố ${A}$, ${F}$ với $P(F)=0,65$; $P(A|F) =0,12$ và $P\\left(A|\\overline{F}\\right)=0,60$. Tính xác suất $P(A)$ (kết quả làm tròn đến hàng phần trăm).\nA. ${0,16}$.\t   B. ${0,97}$.\t    C. *${0,29}$.\t     D. ${0,89}$.\n\nLời giải:\n Chọn C \n Ta có: $P(\\overline{F})=1-P(F)=0,35$.\n\nÁp dụng công thức toàn phần ta có:\n\n$P(A) = P(A|F). P(F) + P\\left(A|\\overline{F}\\right).P\\left(\\overline{F}\\right)$$=0,12.0,65+0,60.0,35=0,29$. \n\n", "options": [{"label": "A", "text": "${0,16}$.", "is_correct": false}, {"label": "B", "text": "${0,97}$.", "is_correct": false}, {"label": "C", "text": "${0,29}$.", "is_correct": true}, {"label": "D", "text": "${0,89}$.", "is_correct": false}], "correct_answer": "", "image_paths": [], "image_lookup": {}}, {"title": "Câu 7", "part": 1, "type": "mc", "content": "Cho hai biến cố ${D}$, ${A}$ với $P(D)=0,32$; $P(D|A) =0,46$ và $P\\left(D|\\overline{A}\\right)=0,05$. Tính xác suất $P(A)$ (kết quả làm tròn đến hàng phần trăm).", "images": [], "explanation": "Cho hai biến cố ${D}$, ${A}$ với $P(D)=0,32$; $P(D|A) =0,46$ và $P\\left(D|\\overline{A}\\right)=0,05$. Tính xác suất $P(A)$ (kết quả làm tròn đến hàng phần trăm).\nA. ${0,69}$.\t   B. *${0,66}$.\t    C. ${0,94}$.\t     D. ${0,59}$.\n\nLời giải:\n Chọn B \n Đặt $P(A)=x \\Rightarrow P(\\overline{A})=1-x$.\n\nÁp dụng công thức toàn phần ta có:\n\n$P(D) = P(D|A). P(A) + P\\left(D|\\overline{A}\\right).P\\left(\\overline{A}\\right)$\n\n$\\Leftrightarrow 0,32=0,46x+0,05(1-x)$\n\n$\\Rightarrow x=0,66$. \n\n", "options": [{"label": "A", "text": "${0,69}$.", "is_correct": false}, {"label": "B", "text": "${0,66}$.", "is_correct": true}, {"label": "C", "text": "${0,94}$.", "is_correct": false}, {"label": "D", "text": "${0,59}$.", "is_correct": false}], "correct_answer": "", "image_paths": [], "image_lookup": {}}, {"title": "Câu 8", "part": 1, "type": "mc", "content": "Cho ${A,F}$ là các biến cố. Biết $P(F)=0,58$. Nếu ${F}$ xảy ra thì tỉ lệ ${A}$ xảy ra là $39\\%$. Nếu ${F}$ không xảy ra thì tỉ lệ ${A}$ xảy ra là $64\\%$. Tính xác suất của biến cố ${A}$ (kết quả làm tròn đến hàng phần trăm).", "images": [], "explanation": "Cho ${A,F}$ là các biến cố. Biết $P(F)=0,58$. Nếu ${F}$ xảy ra thì tỉ lệ ${A}$ xảy ra là $39\\%$. Nếu ${F}$ không xảy ra thì tỉ lệ ${A}$ xảy ra là $64\\%$. Tính xác suất của biến cố ${A}$ (kết quả làm tròn đến hàng phần trăm).\nA. ${0,20}$.\t   B. ${0,68}$.\t    C. ${0,36}$.\t     D. *${0,50}$.\n\nLời giải:\n Chọn D \n Ta có: $P(\\overline{F})=1-P(F)=0,42, P(A|F)=0,39, P(A|\\overline{F})=0,64$.\n\n$P(A)=P(A|F).P(F)+P(A|\\overline{F}).P(\\overline{F})$ $=0,39.0,58+0,64.0,42=0,50$. \n\n", "options": [{"label": "A", "text": "${0,20}$.", "is_correct": false}, {"label": "B", "text": "${0,68}$.", "is_correct": false}, {"label": "C", "text": "${0,36}$.", "is_correct": false}, {"label": "D", "text": "${0,50}$.", "is_correct": true}], "correct_answer": "", "image_paths": [], "image_lookup": {}}, {"title": "Câu 9", "part": 1, "type": "mc", "content": "Tỉ lệ người dân đã tiêm vắc xin phòng bệnh X ở một địa phương là $51\\%$. Trong số những người đã tiêm phòng, tỉ lệ mắc bệnh X là $15\\%$, còn trong số những người chưa tiêm, tỉ lệ mắc bệnh X là $72\\%$. Gặp ngẫu nhiên một người ở địa phương đó. Xác suất người đó mắc bệnh X là (kết quả làm tròn đến hàng phần trăm).", "images": [], "explanation": "Tỉ lệ người dân đã tiêm vắc xin phòng bệnh X ở một địa phương là $51\\%$. Trong số những người đã tiêm phòng, tỉ lệ mắc bệnh X là $15\\%$, còn trong số những người chưa tiêm, tỉ lệ mắc bệnh X là $72\\%$. Gặp ngẫu nhiên một người ở địa phương đó. Xác suất người đó mắc bệnh X là (kết quả làm tròn đến hàng phần trăm).\nA. ${0,93}$.\t   B. *${0,43}$.\t    C. ${0,02}$.\t     D. ${0,38}$.\n\nLời giải:\n Chọn B \n  Gọi ${M}$ là biến cố \"người được gặp mắc bệnh\".\n\n Gọi ${T}$ là biến cố \"người được gặp đã tiêm phòng vắc xin\".\n\n Suy ra $\\overline{T}$ là biến cố \"người được gặp chưa tiêm phòng vắc xin\".\n\nÁp dụng công thức toàn phần ta có:\n\n$P(M) = P(M|T). P(T) + P\\left(M|\\overline{T}\\right).P\\left(\\overline{T}\\right)$$=0,15.0,51+0,72.0,49=0,43$. \n\n", "options": [{"label": "A", "text": "${0,93}$.", "is_correct": false}, {"label": "B", "text": "${0,43}$.", "is_correct": true}, {"label": "C", "text": "${0,02}$.", "is_correct": false}, {"label": "D", "text": "${0,38}$.", "is_correct": false}], "correct_answer": "", "image_paths": [], "image_lookup": {}}, {"title": "Câu 1", "part": 3, "type": "short", "content": "Trong một kì thi tốt nghiệp trung học phổ thông, một tỉnh X có $73 \\%$ học sinh lựa chọn tổ hợp C00 (gồm các môn Ngữ văn, Lịch sử, Địa lí). Biết rằng, nếu một học sinh chọn tổ hợp C00 thì xác suất để học sinh đó đỗ đại học là ${0,75}$; còn nếu một học sinh không chọn tổ hợp C00 thì xác suất để học sinh đó đỗ đại học là ${0,63}$. Chọn ngẫu nhiên một học sinh của tỉnh X đã tốt nghiệp trung học phổ thông trong kì thi trên. Tính xác suất để học sinh đó đỗ đại học.(kết quả làm tròn đến hàng phần trăm)", "images": [], "explanation": "Trong một kì thi tốt nghiệp trung học phổ thông, một tỉnh X có $73 \\%$ học sinh lựa chọn tổ hợp C00 (gồm các môn Ngữ văn, Lịch sử, Địa lí). Biết rằng, nếu một học sinh chọn tổ hợp C00 thì xác suất để học sinh đó đỗ đại học là ${0,75}$; còn nếu một học sinh không chọn tổ hợp C00 thì xác suất để học sinh đó đỗ đại học là ${0,63}$. Chọn ngẫu nhiên một học sinh của tỉnh X đã tốt nghiệp trung học phổ thông trong kì thi trên. Tính xác suất để học sinh đó đỗ đại học.(kết quả làm tròn đến hàng phần trăm)\n\nLời giải:\n Gọi $A$ là biến cố: Học sinh đó chọn tổ hợp C00; $B$ là biến cố: Học sinh đó đỗ đại học.\n\n$P(A)=0,73,P(\\overline{A})=1-P(A)=0,27$.\n\n$P(B|A)$ là xác suất để một học sinh đỗ đại học với điều kiện học sinh đó chọn tổ hợp C00.\n\n$\\Rightarrow P(B|A)=0,75$.\n\n$P(B|\\overline{A})$ là xác suất để một học sinh đỗ đại học với điều kiện học sinh đó chọn tổ hợp C00.\n\n$\\Rightarrow P(B|\\overline{A})=0,63$.\n\nThay vào công thức xác suất toàn phần ta được:\n\n$P(B)=P(A).P(B|A)+P(\\overline{A}).P(B|\\overline{A})=0,73.0,75+0,27.0,63=0,72$. \nĐáp án: 0,72\n\n", "options": [], "correct_answer": "0,72", "image_paths": [], "image_lookup": {}}];
+                    initSlides(data);
+                    initImageZoom(); 
+                } catch(err) {
+                    document.body.innerHTML = "<div style='padding:30px; text-align:center; font-family: sans-serif;'><h2 style='color:#dc2626; font-size:24px;'>⚠️ LỖI HIỂN THỊ TRÊN ZALO/MESSENGER</h2><p style='font-size:18px; color:#334155;'>Trình duyệt nội bộ đang chặn hệ thống Toán học.</p><p style='font-size:16px; color:#004b87; font-weight:bold; background:#e0f2fe; padding:15px; border-radius:10px;'>👉 Vui lòng bấm nút [Chia sẻ] (Góc trên bên phải) ➔ Chọn [Mở bằng Safari] (hoặc Chrome) để làm bài bình thường nhé!</p></div>";
+                }
+            });
+        </script>
+        </body></html>
