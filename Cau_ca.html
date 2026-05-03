@@ -1,0 +1,658 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trò Chơi Câu Cá Toán Học 12</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        MathJax = {
+            tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$'], ['\\[', '\\]']] }
+        };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;900&display=swap');
+        body { font-family: 'Nunito', sans-serif; user-select: none; overflow: hidden; background-color: #87CEEB;}
+        canvas { display: block; }
+        .modal-bg { background: rgba(0, 0, 0, 0.6); backdrop-filter: blur(4px); }
+        .math-text { font-size: 1.25rem; }
+        .tf-grid { display: grid; grid-template-columns: 1fr auto auto; gap: 10px; align-items: center; }
+        .fish-btn { transition: transform 0.1s; }
+        .fish-btn:active { transform: scale(0.95); }
+        .time-low { animation: pulseTime 1s infinite; color: #DC2626 !important; }
+        @keyframes pulseTime { 0% { transform: scale(1); } 50% { transform: scale(1.1); } 100% { transform: scale(1); } }
+    </style>
+</head>
+<body class="h-screen w-screen relative">
+
+    <!-- Canvas Game -->
+    <canvas id="gameCanvas" class="absolute top-0 left-0 w-full h-full"></canvas>
+
+    <!-- Start Modal -->
+    <div id="startModal" class="fixed inset-0 modal-bg flex items-center justify-center z-[60]">
+        <div class="bg-white p-10 rounded-3xl shadow-2xl text-center border-8 border-blue-400 max-w-md mx-4">
+            <h1 class="text-6xl mb-4">🎣</h1>
+            <h2 class="text-3xl font-black text-blue-600 mb-4">Câu Cá Toán Học 12</h2>
+            <p class="text-gray-700 text-lg mb-4">Hãy chọn thời gian chơi và trả lời đúng các câu hỏi Nguyên hàm - Tích phân để tích điểm nhé!</p>
+            <div class="mb-6 flex items-center justify-center gap-3">
+                <label for="timeInput" class="text-xl font-bold text-gray-800">Thời gian (mm:ss):</label>
+                <input type="text" id="timeInput" value="02:00" placeholder="02:00" maxlength="5" class="w-32 text-2xl font-black text-center text-blue-600 border-4 border-blue-300 rounded-xl focus:outline-none focus:border-blue-500 p-2">
+            </div>
+            <button id="startGameBtn" class="bg-gradient-to-r from-blue-500 to-blue-700 hover:from-blue-600 hover:to-blue-800 text-white font-bold py-4 px-10 rounded-full shadow-lg fish-btn text-xl w-full">
+                BẮT ĐẦU CHƠI
+            </button>
+        </div>
+    </div>
+
+    <!-- UI Overlay -->
+    <div class="absolute top-4 left-4 bg-white/90 px-6 py-2 rounded-full shadow-lg border-4 border-blue-400 z-10">
+        <h1 class="text-2xl font-black text-blue-600">Điểm: <span id="scoreDisplay" class="text-orange-500">0</span></h1>
+    </div>
+    
+    <!-- Timer Overlay -->
+    <div class="absolute top-4 left-1/2 transform -translate-x-1/2 bg-white/90 px-6 py-2 rounded-full shadow-lg border-4 border-blue-400 z-10">
+        <h1 class="text-2xl font-black text-blue-600 flex items-center gap-2">
+            ⏳ <span id="timerDisplay" class="text-red-500 font-mono tracking-wider">02:00</span>
+        </h1>
+    </div>
+
+    <div class="absolute top-4 right-4 bg-white/90 px-4 py-2 rounded-full shadow-lg border-4 border-blue-400 z-10">
+        <h1 class="text-lg font-bold text-blue-600">Cá còn lại: <span id="fishCountDisplay" class="text-orange-500">20</span></h1>
+    </div>
+
+    <div class="absolute bottom-4 w-full text-center pointer-events-none z-10">
+        <p class="text-white font-bold text-xl drop-shadow-md shadow-black">Nhấp chuột vào bất kỳ đâu trên biển để quăng cần câu!</p>
+    </div>
+
+    <!-- Question Modal -->
+    <div id="questionModal" class="fixed inset-0 modal-bg hidden flex items-center justify-center z-50">
+        <div class="bg-white p-8 rounded-3xl shadow-2xl max-w-2xl w-full mx-4 border-8 border-blue-300 relative transform transition-all">
+            <div id="pointsBadge" class="absolute -top-6 -right-6 bg-yellow-400 text-red-600 font-black text-2xl rounded-full w-20 h-20 flex items-center justify-center border-4 border-white shadow-lg transform rotate-12">
+                +10
+            </div>
+            <h2 id="qTypeHeader" class="text-2xl font-bold text-blue-500 mb-2 uppercase tracking-wider">Trắc nghiệm</h2>
+            <div id="questionContent" class="math-text text-gray-800 mb-6 bg-blue-50 p-4 rounded-xl border border-blue-100 min-h-[100px]">
+                <!-- Nội dung câu hỏi -->
+            </div>
+            
+            <div id="answerArea" class="space-y-4">
+                <!-- Khu vực nhập/chọn đáp án -->
+            </div>
+
+            <div class="mt-8 flex justify-between items-center">
+                <p id="feedbackMsg" class="font-bold text-lg hidden"></p>
+                <button id="submitBtn" class="bg-gradient-to-r from-green-400 to-green-600 hover:from-green-500 hover:to-green-700 text-white font-bold py-3 px-8 rounded-full shadow-lg fish-btn ml-auto block">
+                    Trả lời
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- End Game Modal -->
+    <div id="endModal" class="fixed inset-0 modal-bg hidden flex items-center justify-center z-50">
+        <div class="bg-white p-10 rounded-3xl shadow-2xl text-center border-8 border-yellow-400 max-w-md w-full mx-4">
+            <h1 id="endEmoji" class="text-5xl mb-4">🎉</h1>
+            <h2 id="endTitle" class="text-4xl font-black text-blue-600 mb-2">Chúc Mừng!</h2>
+            <p id="endSubtitle" class="text-xl text-gray-700 mb-6">Bạn đã câu hết đàn cá.</p>
+            <div class="bg-yellow-100 p-6 rounded-2xl mb-8">
+                <p class="text-gray-600 font-bold mb-1">Tổng điểm của bạn</p>
+                <p id="finalScore" class="text-6xl font-black text-red-500">0</p>
+            </div>
+            <button onclick="location.reload()" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 px-8 rounded-full shadow-lg fish-btn w-full text-xl">
+                Chơi Lại
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // --- ÂM THANH (AUDIO SYNTHESIS) ---
+        let audioCtx;
+        function initAudio() {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+        }
+
+        // Hàm phát một nốt nhạc cơ bản
+        function playTone(freq, type, duration, vol = 0.1) {
+            if (!audioCtx) return;
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.type = type;
+            osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+            
+            // Envelope để âm thanh mượt mà, không bị click
+            gain.gain.setValueAtTime(0, audioCtx.currentTime);
+            gain.gain.linearRampToValueAtTime(vol, audioCtx.currentTime + 0.05);
+            gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
+            
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.start();
+            osc.stop(audioCtx.currentTime + duration);
+        }
+
+        // Các hiệu ứng âm thanh cụ thể
+        function playCastSound() {
+            playTone(600, 'sine', 0.1, 0.1);
+            setTimeout(() => playTone(800, 'sine', 0.2, 0.1), 50);
+        }
+
+        function playCatchSound() {
+            playTone(1200, 'square', 0.1, 0.05);
+        }
+
+        function playCorrectSound() {
+            playTone(523.25, 'sine', 0.1, 0.1); // C5
+            setTimeout(() => playTone(659.25, 'sine', 0.1, 0.1), 100); // E5
+            setTimeout(() => playTone(783.99, 'sine', 0.2, 0.1), 200); // G5
+            setTimeout(() => playTone(1046.50, 'triangle', 0.4, 0.15), 300); // C6
+        }
+
+        function playWrongSound() {
+            playTone(300, 'sawtooth', 0.3, 0.1);
+            setTimeout(() => playTone(250, 'sawtooth', 0.4, 0.15), 200);
+        }
+
+        // Nhạc nền (BGM)
+        let bgmInterval = null;
+        const bgmNotes = [261.63, 329.63, 392.00, 523.25, 392.00, 329.63]; // C E G C G E
+        let bgmIdx = 0;
+
+        function startBGM() {
+            if (bgmInterval) return;
+            bgmInterval = setInterval(() => {
+                // Chỉ phát nhạc nền khi ở ngoài biển
+                if (gameState === 'playing' || gameState === 'casting' || gameState === 'reeling') {
+                    playTone(bgmNotes[bgmIdx], 'triangle', 0.3, 0.02); // Âm lượng siêu nhỏ làm nền
+                    bgmIdx = (bgmIdx + 1) % bgmNotes.length;
+                }
+            }, 350);
+        }
+
+        function stopBGM() {
+            if (bgmInterval) {
+                clearInterval(bgmInterval);
+                bgmInterval = null;
+            }
+        }
+
+
+        // --- TIME ĐẾM NGƯỢC ---
+        let totalTime = 120; // 2 phút = 120 giây
+        let timerInterval = null;
+        const timerDisplay = document.getElementById('timerDisplay');
+
+        function startTimer() {
+            if (timerInterval) return;
+            updateTimerUI();
+            timerInterval = setInterval(() => {
+                if (gameState !== 'gameover') {
+                    totalTime--;
+                    updateTimerUI();
+                    
+                    // Hiệu ứng nhấp nháy khi còn dưới 1 phút
+                    if (totalTime === 60) {
+                        timerDisplay.classList.add('time-low');
+                    }
+
+                    if (totalTime <= 0) {
+                        endGame(true); // true = hết giờ
+                    }
+                }
+            }, 1000);
+        }
+
+        function updateTimerUI() {
+            let m = Math.floor(totalTime / 60).toString().padStart(2, '0');
+            let s = (totalTime % 60).toString().padStart(2, '0');
+            timerDisplay.innerText = `${m}:${s}`;
+        }
+
+
+        // --- DATA CÂU HỎI ---
+        const questionsData = {"mcq": [{"q": "Cho hàm số $y=- 2 x^{3} + 4 x^{2} + x + 5$. Viết phương trình tiếp tuyến của đồ thị hàm số đã cho tại điểm $M(-2;35)$.", "options": ["$y=- 39 x - 43$.", "$y=- 38 x$.", "$y=113 - 39 x$.", "$y=35 - 39 x$."], "correct": 0}, {"q": "Cho hàm số $y=\\frac{1}{x}$. Tiếp tuyến của đồ thị hàm số đã cho tại điểm có hoành độ $x=-2$ có hệ số góc bằng", "options": ["${- \\frac{1}{16}}$.", "${\\frac{1}{4}}$.", "${- \\frac{1}{2}}$.", "${- \\frac{1}{4}}$."], "correct": 3}, {"q": "Cho hàm số $y=4 x^{3} + 2 x^{2} - 5 x - 5$. Tiếp tuyến của đồ thị hàm số đã cho tại điểm có hoành độ $x_0=1$ có hệ số góc k bằng.", "options": ["${k=4}$.", "${k=11}$.", "${k=-10}$.", "${k=12}$."], "correct": 1}], "sa": [{"q": "Cho hàm số $y=2 x^{2} - 3 x + 6$. Biết một tiếp tuyến của đồ thị hàm số có hệ số góc $k=-7$ có phương trình dạng $y=ax+b$. Tính $4 a - 2 b$.", "correct": "-36"}], "tf": []};
+
+        // --- CẤU HÌNH GAME ---
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        
+        let GAME_WIDTH = window.innerWidth;
+        let GAME_HEIGHT = window.innerHeight;
+        canvas.width = GAME_WIDTH;
+        canvas.height = GAME_HEIGHT;
+
+        // Xử lý resize
+        window.addEventListener('resize', () => {
+            GAME_WIDTH = window.innerWidth;
+            GAME_HEIGHT = window.innerHeight;
+            canvas.width = GAME_WIDTH;
+            canvas.height = GAME_HEIGHT;
+            boat.x = GAME_WIDTH * 0.3; // Đẩy thuyền sang bên trái (30% chiều rộng)
+        });
+
+        // Định nghĩa các loại cá
+        const FISH_TYPES = [
+            { type: 'mcq', emoji: '🐟', size: 35, points: 10, name: 'Cá Cơm' },
+            { type: 'mcq', emoji: '🐠', size: 40, points: 10, name: 'Cá Hồi' },
+            { type: 'sa', emoji: '🐡', size: 55, points: 15, name: 'Cá Ngừ' },
+            { type: 'sa', emoji: '🦑', size: 50, points: 15, name: 'Mực' },
+            { type: 'tf', emoji: '🦈', size: 80, points: 20, name: 'Cá Mập' },
+            { type: 'tf', emoji: '🐬', size: 75, points: 20, name: 'Cá Heo' }
+        ];
+
+        let score = 0;
+        let fishes = [];
+        let gameState = 'init'; // init, playing, casting, reeling, question, gameover
+        let currentFish = null;
+
+        // Thuyền và người
+        const boat = {
+            x: GAME_WIDTH * 0.3, // Đẩy thuyền sang bên trái (30% chiều rộng)
+            y: 90,
+            width: 120,
+            height: 60
+        };
+
+        // Lưỡi câu
+        const hook = {
+            x: boat.x,
+            y: boat.y,
+            targetX: 0,
+            targetY: 0,
+            speed: 15
+        };
+
+        // Xử lý tự động định dạng ô nhập thời gian theo chuẩn mm:ss
+        const timeInput = document.getElementById('timeInput');
+        timeInput.addEventListener('input', (e) => {
+            let v = e.target.value.replace(/[^0-9]/g, ''); // Xóa tất cả các ký tự không phải là số
+            if (v.length > 4) v = v.slice(0, 4);
+            if (v.length > 2) {
+                e.target.value = v.slice(0, 2) + ':' + v.slice(2);
+            } else {
+                e.target.value = v;
+            }
+        });
+
+        // Start Game Button Logic
+        document.getElementById('startGameBtn').addEventListener('click', () => {
+            initAudio();
+            
+            // Lấy và tính toán thời gian từ ô nhập dạng mm:ss
+            let timeStr = document.getElementById('timeInput').value;
+            let parts = timeStr.split(':');
+            let m = parseInt(parts[0]) || 0;
+            let s = parseInt(parts[1]) || 0;
+            totalTime = m * 60 + s;
+            
+            // Nếu người dùng nhập sai hoặc bằng 0, mặc định lấy 2 phút
+            if (isNaN(totalTime) || totalTime <= 0) {
+                totalTime = 120;
+            }
+            
+            document.getElementById('startModal').classList.add('hidden');
+            gameState = 'playing';
+            startBGM();
+            startTimer();
+            initFishes();
+            requestAnimationFrame(loop);
+        });
+
+        // Khởi tạo đàn cá 20 con
+        function initFishes() {
+            fishes = [];
+            for (let i = 0; i < 20; i++) {
+                let rType;
+                if (i < 8) rType = FISH_TYPES.filter(f => f.type === 'mcq')[Math.floor(Math.random() * 2)];
+                else if (i < 14) rType = FISH_TYPES.filter(f => f.type === 'sa')[Math.floor(Math.random() * 2)];
+                else rType = FISH_TYPES.filter(f => f.type === 'tf')[Math.floor(Math.random() * 2)];
+
+                let qPool = questionsData[rType.type];
+                let randomQ = qPool[Math.floor(Math.random() * qPool.length)];
+
+                fishes.push({
+                    id: i,
+                    x: Math.random() * GAME_WIDTH,
+                    y: Math.random() * (GAME_HEIGHT - 250) + 200,
+                    vx: (Math.random() * 1.5 + 0.5) * (Math.random() > 0.5 ? 1 : -1),
+                    vy: (Math.random() - 0.5) * 0.5,
+                    ...rType,
+                    question: randomQ,
+                    isCaught: false
+                });
+            }
+            updateFishCount();
+        }
+
+        function updateFishCount() {
+            document.getElementById('fishCountDisplay').innerText = fishes.length;
+        }
+
+        // VẼ BACKGROUND
+        function drawBackground() {
+            let skyGrad = ctx.createLinearGradient(0, 0, 0, 150);
+            skyGrad.addColorStop(0, "#87CEEB");
+            skyGrad.addColorStop(1, "#E0F6FF");
+            ctx.fillStyle = skyGrad;
+            ctx.fillRect(0, 0, GAME_WIDTH, 150);
+
+            ctx.fillStyle = "#FFD700";
+            ctx.beginPath();
+            ctx.arc(100, 80, 40, 0, Math.PI * 2);
+            ctx.fill();
+
+            let seaGrad = ctx.createLinearGradient(0, 150, 0, GAME_HEIGHT);
+            seaGrad.addColorStop(0, "#006994");
+            seaGrad.addColorStop(1, "#001e36");
+            ctx.fillStyle = seaGrad;
+            ctx.fillRect(0, 150, GAME_WIDTH, GAME_HEIGHT - 150);
+            
+            ctx.strokeStyle = "rgba(255,255,255,0.2)";
+            ctx.lineWidth = 2;
+            for(let i=0; i<10; i++) {
+                ctx.beginPath();
+                ctx.moveTo((Math.sin(Date.now() / 1000 + i) * 20) + (i * GAME_WIDTH/10), 150 + Math.random()*(GAME_HEIGHT-150));
+                ctx.lineTo((Math.sin(Date.now() / 1000 + i) * 20) + (i * GAME_WIDTH/10) + 50, 150 + Math.random()*(GAME_HEIGHT-150));
+                ctx.stroke();
+            }
+        }
+
+        // VẼ THUYỀN VÀ NGƯỜI
+        function drawBoat() {
+            ctx.save();
+            ctx.translate(boat.x, boat.y);
+            ctx.font = "80px Arial";
+            ctx.textAlign = "center";
+            ctx.textBaseline = "middle";
+            ctx.fillText("🚣", 0, -20);
+            ctx.restore();
+        }
+
+        // VẼ CÁ
+        function drawFishes() {
+            fishes.forEach(fish => {
+                ctx.save();
+                ctx.translate(fish.x, fish.y);
+                
+                if (fish.vx < 0 && !fish.isCaught) ctx.scale(-1, 1);
+                else if (fish.isCaught) ctx.rotate(-Math.PI / 2);
+
+                ctx.font = `${fish.size}px Arial`;
+                ctx.textAlign = "center";
+                ctx.textBaseline = "middle";
+                ctx.fillText(fish.emoji, 0, 0);
+                ctx.restore();
+
+                ctx.save();
+                ctx.translate(fish.x, fish.y - fish.size/2 - 10);
+                ctx.beginPath();
+                ctx.arc(0, 0, 14, 0, Math.PI * 2);
+                ctx.fillStyle = "rgba(255, 255, 255, 0.8)";
+                ctx.fill();
+                ctx.strokeStyle = "#FF8C00";
+                ctx.lineWidth = 2;
+                ctx.stroke();
+
+                ctx.fillStyle = "#FF4500";
+                ctx.font = "bold 14px Nunito";
+                ctx.textAlign = "center";
+                ctx.textBaseline = "middle";
+                ctx.fillText(fish.points, 0, 1);
+                ctx.restore();
+            });
+        }
+
+        // VẼ DÂY CÂU
+        function drawHook() {
+            if (gameState === 'casting' || gameState === 'reeling') {
+                ctx.beginPath();
+                ctx.moveTo(boat.x + 30, boat.y - 40); 
+                ctx.lineTo(hook.x, hook.y);
+                ctx.strokeStyle = "rgba(255, 255, 255, 0.8)";
+                ctx.lineWidth = 2;
+                ctx.stroke();
+
+                ctx.beginPath();
+                ctx.arc(hook.x, hook.y, 4, 0, Math.PI * 2);
+                ctx.fillStyle = "#A9A9A9";
+                ctx.fill();
+            }
+        }
+
+        // UPDATE LOGIC GAME
+        function update() {
+            if (gameState === 'playing') {
+                fishes.forEach(fish => {
+                    fish.x += fish.vx;
+                    fish.y += fish.vy;
+                    if (fish.x > GAME_WIDTH + 50) fish.x = -50;
+                    if (fish.x < -50) fish.x = GAME_WIDTH + 50;
+                    if (fish.y < 180) { fish.y = 180; fish.vy *= -1; }
+                    if (fish.y > GAME_HEIGHT - 50) { fish.y = GAME_HEIGHT - 50; fish.vy *= -1; }
+                });
+            } else if (gameState === 'casting') {
+                let dx = hook.targetX - hook.x;
+                let dy = hook.targetY - hook.y;
+                let dist = Math.sqrt(dx*dx + dy*dy);
+                
+                if (dist < hook.speed) {
+                    hook.x = hook.targetX;
+                    hook.y = hook.targetY;
+                    gameState = 'reeling';
+                    currentFish.isCaught = true;
+                    playCatchSound(); // Âm thanh cắn câu
+                } else {
+                    hook.x += (dx / dist) * hook.speed;
+                    hook.y += (dy / dist) * hook.speed;
+                }
+            } else if (gameState === 'reeling') {
+                let dx = boat.x + 30 - hook.x;
+                let dy = boat.y - 40 - hook.y;
+                let dist = Math.sqrt(dx*dx + dy*dy);
+                
+                if (dist < hook.speed) {
+                    gameState = 'question';
+                    showQuestionModal();
+                } else {
+                    hook.x += (dx / dist) * hook.speed;
+                    hook.y += (dy / dist) * hook.speed;
+                    currentFish.x = hook.x;
+                    currentFish.y = hook.y + 20; 
+                }
+            }
+        }
+
+        // MAIN LOOP
+        function loop() {
+            if(gameState !== 'init'){
+                ctx.clearRect(0, 0, GAME_WIDTH, GAME_HEIGHT);
+                drawBackground();
+                drawBoat();
+                drawFishes();
+                drawHook();
+                update();
+            }
+            if(gameState !== 'gameover' || totalTime <= 0) {
+                requestAnimationFrame(loop);
+            }
+        }
+
+        // CLICK XỬ LÝ QUĂNG CẦN
+        canvas.addEventListener('mousedown', () => {
+            if (gameState === 'playing' && fishes.length > 0) {
+                let rIndex = Math.floor(Math.random() * fishes.length);
+                currentFish = fishes[rIndex];
+                
+                hook.x = boat.x + 30;
+                hook.y = boat.y - 40;
+                hook.targetX = currentFish.x;
+                hook.targetY = currentFish.y;
+                
+                gameState = 'casting';
+                playCastSound(); // Phát âm thanh quăng dây
+            }
+        });
+
+        // --- UI & LOGIC CÂU HỎI ---
+        const modal = document.getElementById('questionModal');
+        const qContent = document.getElementById('questionContent');
+        const ansArea = document.getElementById('answerArea');
+        const pointsBadge = document.getElementById('pointsBadge');
+        const submitBtn = document.getElementById('submitBtn');
+        const feedbackMsg = document.getElementById('feedbackMsg');
+        const qTypeHeader = document.getElementById('qTypeHeader');
+
+        function showQuestionModal() {
+            let q = currentFish.question;
+            pointsBadge.innerText = `+${currentFish.points}`;
+            feedbackMsg.classList.add('hidden');
+            submitBtn.style.display = 'block';
+            
+            if (currentFish.type === 'mcq') {
+                qTypeHeader.innerText = "Trắc Nghiệm (Chọn 1 đáp án)";
+                qTypeHeader.className = "text-xl font-bold text-blue-600 mb-2 uppercase tracking-wider";
+                qContent.innerHTML = q.q;
+                
+                let html = '<div class="grid grid-cols-1 md:grid-cols-2 gap-4">';
+                q.options.forEach((opt, idx) => {
+                    html += `
+                        <label class="flex items-center p-4 border-2 border-gray-200 rounded-xl cursor-pointer hover:bg-blue-50 hover:border-blue-300 transition-colors">
+                            <input type="radio" name="mcqAns" value="${idx}" class="w-5 h-5 text-blue-600">
+                            <span class="ml-3 math-text">${opt}</span>
+                        </label>
+                    `;
+                });
+                html += '</div>';
+                ansArea.innerHTML = html;
+            } 
+            else if (currentFish.type === 'sa') {
+                qTypeHeader.innerText = "Trả Lời Ngắn (Nhập kết quả)";
+                qTypeHeader.className = "text-xl font-bold text-purple-600 mb-2 uppercase tracking-wider";
+                qContent.innerHTML = q.q;
+                
+                ansArea.innerHTML = `
+                    <input type="text" id="saInput" placeholder="Nhập câu trả lời của bạn vào đây..." 
+                        class="w-full border-2 border-gray-300 p-4 rounded-xl text-xl font-bold text-center focus:border-purple-500 focus:outline-none shadow-inner" autocomplete="off">
+                `;
+                setTimeout(() => document.getElementById('saInput').focus(), 100);
+            }
+            else if (currentFish.type === 'tf') {
+                qTypeHeader.innerText = "Đúng/Sai (Chọn cho từng ý)";
+                qTypeHeader.className = "text-xl font-bold text-red-600 mb-2 uppercase tracking-wider";
+                qContent.innerHTML = q.q;
+                
+                let html = '<div class="space-y-3 bg-gray-50 p-4 rounded-xl border border-gray-200">';
+                html += `
+                    <div class="tf-grid font-bold text-gray-500 border-b pb-2 mb-2">
+                        <div>Mệnh đề</div>
+                        <div class="text-center w-12 text-green-600">Đúng</div>
+                        <div class="text-center w-12 text-red-600">Sai</div>
+                    </div>
+                `;
+                q.statements.forEach((stmt, idx) => {
+                    html += `
+                        <div class="tf-grid items-center py-2 border-b border-gray-100 last:border-0">
+                            <div class="math-text pr-4">${stmt.text}</div>
+                            <input type="radio" name="tf_${idx}" value="true" class="w-6 h-6 mx-auto accent-green-600 cursor-pointer">
+                            <input type="radio" name="tf_${idx}" value="false" class="w-6 h-6 mx-auto accent-red-600 cursor-pointer">
+                        </div>
+                    `;
+                });
+                html += '</div>';
+                ansArea.innerHTML = html;
+            }
+
+            modal.classList.remove('hidden');
+            
+            if(window.MathJax && MathJax.typesetPromise) {
+                MathJax.typesetPromise([document.getElementById('questionModal')]).catch((err) => console.log(err.message));
+            }
+        }
+
+        // Xử lý nút Trả lời
+        submitBtn.onclick = () => {
+            let isCorrect = false;
+            let q = currentFish.question;
+
+            if (currentFish.type === 'mcq') {
+                let selected = document.querySelector('input[name="mcqAns"]:checked');
+                if (!selected) { alert("Vui lòng chọn 1 đáp án!"); return; }
+                if (parseInt(selected.value) === q.correct) isCorrect = true;
+            } 
+            else if (currentFish.type === 'sa') {
+                let val = document.getElementById('saInput').value.trim().replace(/\s/g, ''); 
+                if (val === "") { alert("Vui lòng nhập câu trả lời!"); return; }
+                if (val.toLowerCase() === q.correct.toLowerCase()) isCorrect = true;
+            }
+            else if (currentFish.type === 'tf') {
+                let allChecked = true;
+                let allCorrect = true;
+                for (let i = 0; i < 4; i++) {
+                    let sel = document.querySelector(`input[name="tf_${i}"]:checked`);
+                    if (!sel) { allChecked = false; break; }
+                    let boolVal = sel.value === "true";
+                    if (boolVal !== q.statements[i].correct) allCorrect = false;
+                }
+                if (!allChecked) { alert("Vui lòng chọn Đúng/Sai cho tất cả 4 mệnh đề!"); return; }
+                if (allCorrect) isCorrect = true;
+            }
+
+            submitBtn.style.display = 'none';
+            feedbackMsg.classList.remove('hidden');
+
+            if (isCorrect) {
+                playCorrectSound(); // Âm thanh Trả lời đúng
+                feedbackMsg.innerHTML = `🎉 Tuyệt vời! Chính xác. Cộng ${currentFish.points} điểm.`;
+                feedbackMsg.className = "font-bold text-xl text-green-600 block";
+                score += currentFish.points;
+                document.getElementById('scoreDisplay').innerText = score;
+            } else {
+                playWrongSound(); // Âm thanh Trả lời sai
+                feedbackMsg.innerHTML = `😢 Rất tiếc! Câu trả lời chưa đúng. Con cá đã chạy thoát.`;
+                feedbackMsg.className = "font-bold text-xl text-red-600 block";
+            }
+
+            setTimeout(() => {
+                modal.classList.add('hidden');
+                fishes = fishes.filter(f => f.id !== currentFish.id);
+                updateFishCount();
+
+                if (fishes.length === 0) {
+                    endGame(false); // Xong hết cá
+                } else {
+                    gameState = 'playing';
+                }
+            }, 2500);
+        };
+
+        function endGame(isTimeOut = false) {
+            gameState = 'gameover';
+            clearInterval(timerInterval);
+            stopBGM(); // Tắt nhạc nền
+            
+            document.getElementById('finalScore').innerText = score;
+            
+            if (isTimeOut) {
+                document.getElementById('endEmoji').innerText = "⏰";
+                document.getElementById('endTitle').innerText = "Hết Giờ!";
+                document.getElementById('endTitle').classList.replace("text-blue-600", "text-red-600");
+                document.getElementById('endSubtitle').innerText = "Rất tiếc thời gian đã kết thúc.";
+                playWrongSound(); 
+            } else {
+                document.getElementById('endEmoji').innerText = "🎉";
+                document.getElementById('endTitle').innerText = "Chúc Mừng!";
+                document.getElementById('endSubtitle').innerText = "Bạn đã câu hết đàn cá.";
+                playCorrectSound();
+            }
+
+            document.getElementById('endModal').classList.remove('hidden');
+        }
+
+    </script>
+</body>
+</html>
